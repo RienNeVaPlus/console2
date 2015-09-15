@@ -1,7 +1,7 @@
 {
   "name": "console2",
-  "version": "1.0.1",
-  "description": "Improved console: object inspection, stack traces, tables with ASCII box-drawing characters and colors and even more text so there will be a lot more line breaks to test this shit better.",
+  "version": "2.0.0",
+  "description": "Improved console: object inspection, stack traces, tables with ASCII box-drawing characters and colors.",
   "main": "index.js",
   "scripts": {
     "start": "node ./",
