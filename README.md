@@ -1,10 +1,5 @@
 <h1 align="center">
-	<br>
-	<br>
 	<img width="786" height="378" src="media/logo.png" alt="console2">
-	<br>
-	<br>
-	<br>
 </h1>
 
 #### Massively extends the `console` features to produce human readable output. Provides content boxes using ASCII box-drawing characters, improvements for the output of object inspections (using tables), stack traces and more. It can even beep! ####
@@ -138,16 +133,16 @@ console.log(console.col('I am a beautiful rainbow!', 'rainbow'));
 ## Aliases
 Alias exist to cover features of the native `console` or to provide shortcuts for lazy people like me.
 
-| Shortcut            |    | Alias                     |
-| ------------------- | -- |-------------------------- |
-| console **._**      | ⇔ | console **.line**         |
-| console **.$**      | ⇔ | console **.out**          |
-| console **.flush**  | ⇔ | console **.out**          |
-| console **.info**   | ⇔ | console **.log** (green)  |
-| console **.warn**   | ⇔ | console **.log** (yellow) |
-| console **.error**  | ⇔ | console **.log** (red)    |
-| console **.dir**    | ⇔ | console **.log**          |
-| console **.timeEnd**| ⇔ | console **.log**          |
+| Shortcut             | ⇔  | Alias                    |
+|:-------------------- | --:|:------------------------ |
+| console **._**       | ⇔ | console **.line**         |
+| console **.$**       | ⇔ | console **.out**          |
+| console **.flush**   | ⇔ | console **.out**          |
+| console **.info**    | ⇔ | console **.log** (green)  |
+| console **.warn**    | ⇔ | console **.log** (yellow) |
+| console **.error**   | ⇔ | console **.log** (red)    |
+| console **.dir**     | ⇔ | console **.log**          |
+| console **.timeEnd** | ⇔ | console **.log**          |
 
 ## Separate mode
 
