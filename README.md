@@ -1,5 +1,5 @@
 <h1 align="center">
-	<img width="786" height="378" src="media/logo.png" alt="console2">
+	<img src="media/logo.png" alt="console2">
 </h1>
 
 #### Massively extends the `console` features to produce human readable output. Provides content boxes using ASCII box-drawing characters, improvements for the output of object inspections (using tables), stack traces and more. It can even beep! ####
@@ -164,7 +164,7 @@ console2.title('Hello World');
 	console.help()
 	<br>
 	<br>
-	<img width="886" height="1947" src="media/help.png" alt="console.help()">
+	<img src="media/help.png" alt="console.help()">
 	<br>
 	<br>
 </h1>
