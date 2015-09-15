@@ -1,0 +1,36 @@
+{
+  "name": "console2",
+  "version": "1.0.0",
+  "description": "Improved console: object inspection, stack traces, tables with ASCII box-drawing characters and colors and even more text so there will be a lot more line breaks to test this shit better.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node ./",
+    "help": "node ./help"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/safebyte/console2"
+  },
+  "keywords": [
+    "console",
+    "console.log",
+    "log",
+    "logger",
+    "ansi",
+    "stdout",
+    "stack",
+    "trace",
+    "object-inspection"
+  ],
+  "author": "Niko Wolf <nw@safebyte.com> (https://www.safebyte.com/)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/safebyte/console2/issues"
+  },
+  "homepage": "https://github.com/safebyte/console2",
+  "dependencies": {
+    "async": "^1.4.2",
+    "chalk": "^1.1.1",
+    "linewrap": "^0.2.1"
+  }
+}
