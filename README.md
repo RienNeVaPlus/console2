@@ -44,10 +44,10 @@ require('console2')();
 
 // log a string
 console.log("They're minerals! Jesus Christ, Marie.");
- // as you know and love it, native methods are fully supported
+// as you know and love it, native methods are fully supported
 
-// start a timer
-console.time('TimerTim');
+// insert empty line & start a timer
+console.spacer().time('TimerTim');
 
 // build a box
 var box = console.box('I am a child.');
@@ -55,14 +55,17 @@ var box = console.box('I am a child.');
 // add a line to our new box
 box.line('I am the 2nd line of the sub box!');
 
-// print the box - always required when using boxes
-box.out();
+// indicate that the box can be printed and there will be no more lines/boxes appended to it
+box.ready();
 
-// print timer
-console.time('TimerTim');
+// insert empty line & print timer
+console.spacer().time('TimerTim');
 
 // make noise
 console.beep();
+
+// print everything, this exists because most actions are async
+console.out();
 ```
 
 #### Result
@@ -90,8 +93,18 @@ Add a line.
 
 ***
 
+#### ``console.ready({...*}[, option])``
+Adds a line and sets the option `{ready:true}`
+
+***
+
 #### ``console.out({...*}[, option])``
 Flush current buffer (use this to actually **see** something).
+
+***
+
+#### ``console.spacer()``
+Flush current buffer + adds an empty line.
 
 ***
 
@@ -115,11 +128,20 @@ Very useful stopwatch that shows the elapsed time in a readable format (ms + yea
 **When called twice, the time in between the two calls is also measured & displayed!**
 
 ```javascript
-console.time()                              // Prints time since box was initialized
-console.time('TimerTony') (1st call)        // starts a timer for tony, outputs 'TimerTony: start'
-console.time('TimerTony', true) (1st call)  // same as above, no output
-console.time('TimerTony') (2nd call)        // outputs 'TimerTony: Xms'
-console.time('TimerTony', true) (2nd call)  // outputs 'TimerTony: Xms - reset', resets the timer
+// Prints time since box was initialized
+console.time();
+
+// (1st call) starts a new timer, outputs 'TimerTony: start'
+console.time('TimerTony');
+
+// (1st call) same as above, no output
+console.time('TimerTony', true);
+
+// (2nd call) outputs 'TimerTony: Xms'
+console.time('TimerTony');
+
+// (2nd call) outputs 'TimerTony: Xms - reset', resets the timer
+console.time('TimerTony', true);
 ```
 
 ***
@@ -135,9 +157,10 @@ Beautified `console.trace`.
 | -------------- |:------------- | ---------:|:----------------------------------------------- |
 | color          | String        | grey      | Primary color                                   |
 | colorText      | String        | grey      | Text color                                      |
-| border         | Number        | 1         | Vertical border-width: `1` (`│`) or `2` (`║`)
+| border         | Number        | 1         | Vertical border-width: `1` (`│`) or `2` (`║`)  |
+| ready          | Boolean       | `false`   | Allow output of box when a parent uses `out()`  |
 | console        | Object        | `console` | Object to receive the output of console2.out.<br>Needs to have the same properties as the `console`. |
-| disableNewline | Boolean       | false     | Disable the output of a `\n` character before every call of `console.out`.
+| addNewline     | Boolean       | false     | Adds a `\n` before every before every call of `console.out`.
 | disableAutoOut | Boolean       | false     | Console2 tries to detect whether to automatically call<br>`console.out` after new lines have been added. You can disable this.
 | override       | Boolean       | true      | Whether to override nodes `console`.<br>Can only be set when first calling the function returned by the module. |
 
@@ -149,7 +172,8 @@ Beautified `console.trace`.
 ***
 
 #### ``console.col({String} input, {...String} color)``
-Colorizes the `input`, can take multiple colors / commands  ([see module `chalk`](https://github.com/chalk/chalk)).
+
+Colorizes the `input`, can take multiple colors / commands  ([see module **chalk**](https://github.com/chalk/chalk)).
 
 - Colors: `cyan`, `green`, `yellow`, `red`, `magenta`, `blue`, `white`, `grey`, `black`
 - Backgrounds: `bgCyan`, `bgGreen`, `bgYellow`, `bgRed`, `bgMagenta`, `bgBlue`, `bgWhite`, `bgGrey`, `bgBlack`
@@ -160,6 +184,23 @@ Use to colorize a string before adding it:
 
 ```javascript
 console.log(console.col('I am a beautiful rainbow!', 'rainbow'));
+```
+
+***
+
+#### ``console.strip({String} input)``
+
+Removes any ansi codes from the `input` string ([see module **chalk**](https://github.com/chalk/chalk)).
+
+***
+
+#### ``console.pad({String} padSymbol, {Number|String} length, {Number} [max])``
+
+Utility to generate a pad string when working with aligned texts.
+
+```js
+console.pad('-', 5)           // = '-----'
+console.pad('.', 'Hello', 7)  // = 'Hello..'
 ```
 
 ## Aliases

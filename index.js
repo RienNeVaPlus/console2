@@ -16,24 +16,41 @@ function Log(parent, opt){
 	// generate id (timestr+rand)
 	this.id = (new Date().getTime()).toString(36)+((Math.random().toString(36).substr(2, 5)));
 
-	this.options(opt);
-
 	this.lines = [];
 	this.parent = null;
 	this.level = 0;
-	this.colors = colors;
+//	this.colors = colors;
 
-	// make color function accessible
+	// make utils accessible
 	this.col = Log.col;
+	this.strip = Log.strip;
+	this.pad = Log.pad;
+
+	// default options
+	this.opt = Log.extend({
+		console:    null,                                   // object to receive the output of console2
+		border:     typeof opt == 'number' ? opt : 1,       // vertical border width (1 or 2)
+		color:      typeof opt == 'string' ? opt : 'grey',  // border color
+		colorText:  typeof opt == 'string' ? opt : 'grey',  // text color
+		addNewline: false,                                  // add new line after every out call
+		enableAutoOut: false,                               // enable auto out calls
+		override:   true,                                   // override nodes console
+		ready:      false                                   // box status
+	}, opt||{});
 
 	// is direct log
 	if(this._instanceof(parent)){
 		this.parent = parent;
 		this.level = parent && parent.level ? parent.level+1 : 1;
+
+		// inherit console object when not given
+		if(!this.opt.console)
+			this.opt.console = this.parent.opt.console;
 	}
-	else if(parent !== undefined){
-		this.line(parent);
-	}
+
+	// use default
+	if(!this.opt.console)
+		this.opt.console = Log.console;
 
 	this.timer = {
 		_: new Date().getTime(),
@@ -289,17 +306,7 @@ Log.parseWord = function(word){
 	else if(word === false)
 		word = colors.bold.red('false');
 	else if(word === pkg.name){
-		var l = word.split('');
-		word = colors.bold(
-			colors.red(l[0])
-			+ colors.magenta([l[1]])
-			+ colors.blue([l[2]])
-			+ colors.cyan([l[3]])
-			+ colors.green(l[4])
-			+ colors.yellow(l[5])
-			+ colors.red(l[6])
-			+ colors.magenta(l[7])
-		);
+		word = Log.col(word, 'rainbow');
 	}
 	else if(typeof word == 'number')
 		word = colors.cyan(word+'');
@@ -398,22 +405,35 @@ Log.prototype.overrideConsole = function(){
 /**
  * Set options
  *
- * @param opt
+ * @param {String|Number|Object} opt
  * @returns {Log}
  */
 Log.prototype.options = function(opt){
-	// default options
-	opt = Log.extend({
-		override:   true,
-		console:    this.parent ? this.parent.opt.console : Log.console,
-		border:     typeof opt == 'number' ? opt : 1,
-		color:      typeof opt == 'string' ? opt : 'grey',
-		colorText:  typeof opt == 'string' ? opt : 'grey',
-		disableNewline: false,
-		disableAutoOut: true
-	}, opt||{});
+	if(opt === undefined)
+		return this;
 
-	this.opt = opt;
+	// handle options('string') - color and 'ready'
+	if(typeof opt == 'string'){
+		if(opt == 'ready')
+			opt = {ready:true};
+		else
+			opt = {color:opt};
+	}
+	// handle options(2) - border width
+	else if(opt === 1 || opt === 2){
+		opt = {border:opt};
+	}
+	// handle options(false) - disable override
+	else if(opt === false){
+		opt = {override:false};
+	}
+
+	// use color as colorText when colorText not given
+	if(opt.color && !opt.colorText)
+		opt.colorText = opt.color;
+
+	// set options
+	this.opt = Log.extend(this.opt, opt);
 
 	return this;
 };
@@ -426,10 +446,26 @@ Log.prototype.options = function(opt){
  * @returns {Log}
  */
 Log.prototype.box = function(line, opt){
+	if(arguments.length == 1){
+		// line could be either an option or a line
+		if(typeof line == 'string'){
+			// check if line is option
+			if(line == 'ready' || Log.chalkColors.indexOf(line) > -1 || Log.chalkCommands.indexOf(line) > -1){
+				opt = line;
+				line = null;
+			}
+		}
+		// line is no string and therefore an option
+		else {
+			opt = line;
+			line = null;
+		}
+	}
+
+	// create box
 	var box = new Log(this, opt||{});
 
 	// auto add 1st line when given
-
 	if(line){
 		box.line(line);
 	}
@@ -444,150 +480,7 @@ Log.prototype.box = function(line, opt){
  * Display help
  */
 Log.prototype.help = function(){
-	// title
-	this
-		._(pkg.name, colors.grey('─ v'+pkg.version))
-		._('---').line(colors.grey(pkg.repository.url))
-		.$();
-
-	// desc
-	this
-		._('Description', 'bold')
-		._('---')
-		._(pkg.description)
-		.$();
-
-	// install
-	this
-		._('Installation', 'white')
-		.title('npm install --save console2');
-	this.$();
-
-	// reference
-	var ref = this
-		._('Reference', 'white')
-		._('Open README.md for complete reference')
-		._()
-		.box();
-
-	// reference
-	var lineArgs = '['+Log.col('line', 'white')+'], ['+Log.col('option', 'white')+']';
-	var docs = {
-		$: '~out',
-		beep: ['Beep noise, outputs "BEEP"', '['+Log.col('title', 'white')+']'],
-		box: ['Create a sub box', lineArgs],
-		col: ['Colorize a string', Log.col('input', 'white')+', {...'+Log.col('color', 'white')+'}'],
-		dir: '~log',
-		error: ['Displays text in '+Log.col('red','red'), lineArgs],
-		flush: '~out',
-		getParent: ['Return a specific parent box', '['+Log.col('generations', 'white')+'=1]'],
-		help: 'Display these information',
-		info: ['Displays text in '+Log.col('green','green'), lineArgs],
-		line: ['Add a new line', lineArgs],
-		log: ['Alias for .line AND .out', lineArgs],
-		options: ['Set option/s', Log.col('object', 'white')],
-		out: 'Print current stack',
-		time: ['Display timer', '['+Log.col('timerName', 'white')+'], ['+Log.col('reset', 'white')+']'],
-		timeEnd: '~time',
-		title: ['Display text inside a box', lineArgs],
-		trace: ['Beautified console.trace', '['+Log.col('message')+']'],
-		warn: ['Displays text in '+Log.col('yellow','yellow'), lineArgs]
-	};
-
-	// insert docs
-	Object.keys(this).sort().forEach(function(key){
-		if(key.substr(0,1)=='_'
-			|| ['Console','assert','overrideConsole'].indexOf(key) > -1
-			|| typeof this[key] != 'function') return;
-		var doc = docs[key];
-		var line = Log.col(key, 'cyan')
-						 + '('+(Array.isArray(doc) ? doc[1] : '')+')';
-
-		// alias
-		if(typeof doc == 'string' && doc.substr(0,1) == '~')
-			doc = 'Alias for '+doc.substr(1);
-
-		// add desc
-		line += Log.pad(' ', 35 - Log.strip(line).length)
-			+ ' - '
-			+ (Array.isArray(doc) ? doc[0] : doc);
-
-		ref._(line);
-	}.bind(this));
-
-	this.$();
-
-	/**
-	 * Example 1
-	 */
-	var example1 = function(){
-	console.line('New Line');
-
-	var box = console.box('Red Box Title', 'red');
-	box
-		.line('Red Box Line')
-		.box('Yellow Box Title', {color:'yellow',colorText:'yellow',border:2})
-		.line('Yellow Box Line')
-		.box(null, 'green').title('Hello World');
-
-	box.line('Red Box Bottom');
-	box.out();
-};
-
-	// example
-	this
-		.title('Example 1: Box-Tree', 'bold');
-	this
-		._(example1)._();
-
-	example1();
-
-	/**
-	 * Example 2
-	 */
-	var example2 = function(){
-	console.log({user:'RienNeVaPlus',id:123,attr:{items:2432,top:[1,2],note:null},online:true});
-};
-
-	// example
-	this.title('Example 2: Object inspection', 'bold');
-	this._(example2)._();
-
-	example2();
-
-	/**
-	 * Example 3
-	 */
-	var example3 = function(){
-		console.time('CustomTimer');    // create new timer
-		console.time();                 // global timer
-		console.time('CustomTimer');    // output created timer
-	};
-
-	// example
-	this.title('Example 3: Stopwatch', 'bold');
-	this._(example3)._();
-
-	example3();
-	this.$();
-
-	/**
-	 * Example 4
-	 */
-	var example4 = function(){
-		console.trace();
-};
-
-	// example
-	this.title('Example 4: Stack trace', 'bold');
-	this._(example4)._();
-
-	example4();
-
-	this.options('green').title(console.col('Have fun!', 'rainbow'));
-	this.$();
-
-	return this;
+	require('./help');
 };
 
 /**
@@ -918,10 +811,10 @@ Log.prototype.trace = function(message){
 		if(i == 0)
 			return box = this.line(line);
 
-		box = box.box(line);
+		box = box.box(line).ready();
 	}.bind(this));
 
-	box.out();
+	box._autoOut();
 
 	return this;
 };
@@ -956,7 +849,19 @@ Log.prototype.title = function(line){
 	this.line(Log.col((Log.pad('─', maxWidth - this.level - 2)+'┘'), this.opt.color, 'dim'), 'pre:');
 
 	// use out?
-	return this._autoOut();
+	return this;
+};
+
+/**
+ * End the current line and insert an empty line (uses this.out!)
+ */
+Log.prototype.spacer = function(){
+	// end line
+	this.out();
+	// empty line
+	this.opt.console.log('');
+
+	return this;
 };
 
 /**
@@ -966,16 +871,17 @@ Log.prototype.title = function(line){
  */
 Log.prototype.beep = function(label){
 	process.stdout.write('\x07');
-	return this.line(Log.col('BEEP'+(typeof label == 'string'?': '+label:''), 'red')).out();
+	return this.line(Log.col('BEEP'+(typeof label == 'string'?': '+label:''), 'red'));//.out();
 };
 
 /**
  * Build output string
  *
  * @param {Function} callback
+ * @param {Boolean} [preserveLines=false]
  * @returns {string}
  */
-Log.prototype._buildString = function(callback){
+Log.prototype._buildString = function(callback, preserveLines){
 	var body = '';
 	var lines = [];
 	var allNr = 0;
@@ -989,8 +895,9 @@ Log.prototype._buildString = function(callback){
 		// iterate lines
 		async.each(log.lines, function(line, callbackLines){
 			// sub box
-			if(this._instanceof(line))
-				return walk(line, callbackLines);
+			if(this._instanceof(line)){
+				return line.opt.ready ? walk(line, callbackLines) : callbackLines();
+			}
 
 			// format
 			lines.push({
@@ -1004,6 +911,19 @@ Log.prototype._buildString = function(callback){
 				line: line.line,
 				log: log
 			});
+
+			// remove printed lines from stack
+			if(!preserveLines){
+//				Log.console.log('REMOVE', log.lines);
+				log.lines = log.lines.filter(function(l){
+					if(log._instanceof(l)) return l.id != log.id;
+					return l != line;
+				});
+//				this.lines = this.lines.filter(function(l){
+//					if(this._instanceof(l)) return l.id != log.id;
+//					return l.line == line.line;// || l.id == log.id;
+//				}.bind(this));
+			}
 
 			// count
 			boxNr++;
@@ -1207,14 +1127,31 @@ Log.prototype._buildString = function(callback){
 				body += "\n" + pre.str + Log.col(str.str, obj.colorText, 'bold');
 			}
 
-			// append line
-			//		body += "\n" + pre.str + str.str;
+
 			callbackLine();
 		}.bind(this),
 		// bind callback so the garbage collector doesn't eat it
 		function(){ arguments[0](body); }.bind(this, callback));
 	}.bind(this));
+};
 
+/**
+ * Mark a sub box as ready for output.
+ *
+ * @returns {undefined|Log}
+ */
+Log.prototype.ready = function(){
+	var args = Array.prototype.slice.call(arguments);
+
+	// mimic .line
+	if(args.length)
+		this.line.apply(this, args);
+
+	// set ready
+	this.opt.ready = true;
+
+	// end
+	return this._return();
 };
 
 /**
@@ -1226,6 +1163,9 @@ Log.prototype._buildString = function(callback){
 Log.prototype.out = function(method){
 	if(!method) method = 'log';
 
+	// mark as ready to print
+	this.opt.ready = true;
+
 	// use parent out when available
 	if(this.parent){
 		return this.parent.out();
@@ -1235,11 +1175,16 @@ Log.prototype.out = function(method){
 	this._try(
 		this._buildString,
 		function(str){
+			str = this.opt.addNewline ? str : str.substr(1);
 			// the output
-			Log.console[method](this.opt.disableNewline ? str.substr(1) : str);
+			if(str !== "\n" && str !== ''){
+//				Log.console.log('--->',[str]);
+				Log.console[method](str);
+			}
+
 
 			// clear lines
-			this.lines = [];
+//			this.lines = [];
 		}.bind(this)
 	);
 
@@ -1331,7 +1276,7 @@ Log.prototype._instanceof = function(instance){
  * @private
  */
 Log.prototype._autoOut = function(){
-	return this.parent === null && this.opt.disableAutoOut === false ? this.out() : this;
+	return this.parent === null && this.opt.enableAutoOut === true ? this.out() : this;
 };
 
 
@@ -1438,7 +1383,7 @@ Log.prototype._object = function(obj, data){
 
 		// create sub box
 		var keys = Object.keys(objSub);
-		var box = parent.box();
+		var box = parent.box().ready();
 
 		// calc colors
 		var color = data.colors[(box.level-this.level-1) % data.colors.length];
