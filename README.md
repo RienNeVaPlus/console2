@@ -4,6 +4,8 @@
 
 #### Massively extends the `console` features to produce human readable output. Provides content boxes using ASCII box-drawing characters, improvements for the output of object inspections (using tables), stack traces and more. It can even beep! ####
 
+#### → [Screenshot of `console.help`](https://raw.githubusercontent.com/safebyte/console2/master/media/help.png)
+
 ## Features
 
 - Structured output using [ASCII box-draing characters](https://en.wikipedia.org/wiki/Box-drawing_character)
@@ -26,7 +28,7 @@ $ npm install --save console2
 
 ### Quick Start
 
-Have a [screenshot](/media/help.png) of the output because you're lazy.
+Have a [screenshot](https://raw.githubusercontent.com/safebyte/console2/master/media/help.png) of the output because you're lazy.
 
 ```javascript
 require('console2')();
