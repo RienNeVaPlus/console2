@@ -112,7 +112,7 @@ Makes your terminal beep, outputs `beep: label`.
 
 #### ``console.time({String} [label], {Boolean} [reset])``
 Very useful stopwatch that shows the elapsed time in a readable format (ms + years, months, days...).
-**When called twice, the time in between the two calls is also meassured & displayed!**
+**When called twice, the time in between the two calls is also measured & displayed!**
 
 ```javascript
 console.time()                              // Prints time since box was initialized
@@ -144,7 +144,7 @@ Beautified `console.trace`.
 **Shortcuts**
 
 - `1`, `2` ⇔ sets `{border:Number}`
-- chalk `color` or `command` (see [console.col][consolecolstring-input-string-color]) ⇔ sets `{color:String,colorText::String}`
+- chalk `color` or `command` (see [console.col][consolecolstring input string color]) ⇔ sets `{color:String,colorText::String}`
 
 ***
 
