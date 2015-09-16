@@ -1,4 +1,4 @@
 require('./')();
 
-// log a string
+// display help
 return console.help();

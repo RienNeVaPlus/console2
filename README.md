@@ -41,7 +41,8 @@ Console2 integrates seamlessly into the node `console`. However, you should make
 require('console2')();
 
 // log a string
-console.log("They're minerals! Jesus Christ, Marie.");  // as you know and love it, native methods are fully supported
+console.log("They're minerals! Jesus Christ, Marie.");
+ // as you know and love it, native methods are fully supported
 
 // start a timer
 console.time('TimerTim');

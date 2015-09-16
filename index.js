@@ -8,7 +8,7 @@ var pkg = require('./package');
 /**
  * Log boxes
  *
- * @param {*} parent - a parent box, a line or options
+ * @param {*} parent - a parent box or a line
  * @param opt
  * @constructor
  */
@@ -298,7 +298,7 @@ Log.parseWord = function(word){
 			+ colors.green(l[4])
 			+ colors.yellow(l[5])
 			+ colors.red(l[6])
-			+ colors.white(l[7])
+			+ colors.magenta(l[7])
 		);
 	}
 	else if(typeof word == 'number')
@@ -306,7 +306,6 @@ Log.parseWord = function(word){
 	else {
 		var s = word.toString();
 		switch(s){
-//			case 'function (){}': s = colors.yellow(s); break;
 			default: s = null;
 		}
 
@@ -551,10 +550,8 @@ Log.prototype.help = function(){
 };
 
 	// example
-	this
-		.title('Example 2: Object inspection', 'bold');
-	this
-		._(example2)._();
+	this.title('Example 2: Object inspection', 'bold');
+	this._(example2)._();
 
 	example2();
 
@@ -568,10 +565,8 @@ Log.prototype.help = function(){
 	};
 
 	// example
-	this
-		.title('Example 3: Stopwatch', 'bold');
-	this
-		._(example3)._();
+	this.title('Example 3: Stopwatch', 'bold');
+	this._(example3)._();
 
 	example3();
 	this.$();
@@ -584,17 +579,13 @@ Log.prototype.help = function(){
 };
 
 	// example
-	this
-		.title('Example 4: Stack trace', 'bold');
-	this
-		._(example4)._();
+	this.title('Example 4: Stack trace', 'bold');
+	this._(example4)._();
 
 	example4();
 
-	this.options('green')
-		.title(console.col('Have fun!', 'rainbow'));
-	this
-		.$();
+	this.options('green').title(console.col('Have fun!', 'rainbow'));
+	this.$();
 
 	return this;
 };
@@ -975,7 +966,7 @@ Log.prototype.title = function(line){
  */
 Log.prototype.beep = function(label){
 	process.stdout.write('\x07');
-	return this.line(colors.red('BEEP'+(typeof label == 'string'?': '+label:''))).out();
+	return this.line(Log.col('BEEP'+(typeof label == 'string'?': '+label:''), 'red')).out();
 };
 
 /**
@@ -1054,9 +1045,8 @@ Log.prototype._buildString = function(callback){
 
 				// 1st from right
 				if(posLeft == obj.level){
-					if(obj.hasPrev == false && obj.hasNext == true){
+					if(obj.hasPrev == false && obj.hasNext == true)
 						s = '┌';
-					}
 					else if(obj.boxNr == 0){
 						if(obj.hasBoxNext || obj.levelNext > obj.level)
 							s = '┬';
@@ -1077,14 +1067,12 @@ Log.prototype._buildString = function(callback){
 						&& obj.hasNext.log.parent.id == obj.log.id
 						)
 						)
-					){
+					)
 						s = '├';
-					}
 					else if(['═','╛'].indexOf(obj.prefix.substr(0,1)) > -1)
 						s = '╘';
-					else {
+					else
 						s = '└';
-					}
 				}
 				// 2nd from right when first of box
 				else if(obj.boxNr == 0 && posLeft == obj.level-1){
@@ -1097,9 +1085,8 @@ Log.prototype._buildString = function(callback){
 					}
 				}
 				// 2nd from right when no next (is closing)
-				else if(!obj.hasBoxNext && obj.levelNext < obj.level-1 && posLeft == obj.level-1){
+				else if(!obj.hasBoxNext && obj.levelNext < obj.level-1 && posLeft == obj.level-1)
 					s = '┘';
-				}
 				else if(!obj.hasBoxNext && obj.levelNext < obj.level-1){
 					if(!obj.hasNext)
 						if(posLeft == 0)
@@ -1109,7 +1096,7 @@ Log.prototype._buildString = function(callback){
 						else
 							s = '└';
 					else {
-						if(posLeft == obj.levelNext )
+						if(posLeft == obj.levelNext)
 							s = '├';
 						else if(posLeft < obj.levelNext)
 							s = '│';
@@ -1195,16 +1182,15 @@ Log.prototype._buildString = function(callback){
 						else if(isLeftLast && isTopLast){
 							if(obj.hasNext && (obj.hasNext.level == obj.level+1 || obj.hasNext.level == obj.level))
 								s = '│';
-							else//├
+							else
 								s = '└';
 						}
 						else if(posTop && ['┴','┘'].indexOf(char) > -1)
 							s = ' ';
 						else if(!posLeft && posTop)
 							s = '│';
-						else if(char == '├' && posTop != 0){
+						else if(char == '├' && posTop != 0)
 							s = '│';
-						}
 						else
 							s = char;
 
@@ -1475,11 +1461,9 @@ Log.prototype._object = function(obj, data){
 		// title "──────[object Object]─┤"
 		if(!title){
 			title = Log.col(objStr, color);
-			title = (
-				colors[color].dim(Log.pad('─', data.pad - box.level - (colors.stripColor(title).length)-3))
-			)
-				+ title
-				+ colors[color].dim('─┐');
+			title =	Log.col(Log.pad('─', data.pad - box.level - (colors.stripColor(title).length)-3), color, 'dim')
+						+ title
+						+ Log.col('─┐', color, 'dim');
 		}
 
 		// add title
@@ -1487,8 +1471,7 @@ Log.prototype._object = function(obj, data){
 			box.line(title, 'pre:');
 
 		if(objSub instanceof Date){
-
-
+			// todo
 		}
 		// build function
 		else if(objSub instanceof Function){
@@ -1567,6 +1550,7 @@ Log.prototype._object = function(obj, data){
 				]
 			};
 
+			// function
 			if(val instanceof Function){
 				valueLines = val.toString().replace(/\t/g, '  ').replace(/\r/g, '').split("\n");
 			}
@@ -1620,10 +1604,11 @@ Log.prototype._object = function(obj, data){
 		);
 
 		box.line(Log.col(
-			'─'
-			+ (Log.pad('─', (data.pad - (box.level) - colors.stripColor(footerStr).length -6)))
-			+ ('─')
-		, color, 'dim')
+				'─'
+				+ (Log.pad('─', (data.pad - (box.level) - Log.strip(footerStr).length -6)))
+				+ ('─')
+			, color, 'dim'
+			)
 		+ footerStr
 		+ Log.col('─', color, 'dim')
 		+ (box.parent && box.parent.level == this.level
@@ -1669,8 +1654,3 @@ module.exports = function(opt){
 
 	return log;
 };
-
-//// auto override
-//if(console instanceof Log === false && this.opt.override){
-//	this.override();
-//}
