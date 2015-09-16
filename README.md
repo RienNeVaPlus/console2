@@ -144,7 +144,7 @@ Beautified `console.trace`.
 **Shortcuts**
 
 - `1`, `2` ⇔ sets `{border:Number}`
-- chalk `color` or `command` (see [console.col][consolecolstring input string color]) ⇔ sets `{color:String,colorText::String}`
+- chalk `color` or `command` (see console.col) ⇔ sets `{color:String,colorText::String}`
 
 ***
 
