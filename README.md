@@ -73,6 +73,8 @@ console.beep();
 
 Console2 not only improves the native console functions (`log`, `info`, `warn`, `error`, `dir`, `time`, `timeEnd`, `trace`) but also provides additional functions.
 
+***
+
 #### ``console.help()``
 Displays a [short tutorial with examples](/media/help.png).
 
@@ -88,7 +90,7 @@ Add a line.
 
 ***
 
-#### ``console.out()``
+#### ``console.out({...*}[, option])``
 Flush current buffer (use this to actually **see** something).
 
 ***
@@ -142,7 +144,7 @@ Beautified `console.trace`.
 **Shortcuts**
 
 - `1`, `2` ⇔ sets `{border:Number}`
-- chalk `color` or `command` (see console.col) ⇔ sets `{color:String,colorText::String}`
+- chalk `color` or `command` (see [console.col][consolecolstring-input-string-color]) ⇔ sets `{color:String,colorText::String}`
 
 ***
 
