@@ -63,29 +63,33 @@ console.time('TimerTim');
 console.beep();
 ```
 
+#### Result
+
+<img src="media/usage.png" />
+
 # Reference
 
 Console2 not only improves the native console functions (`log`, `info`, `warn`, `error`, `dir`, `time`, `timeEnd`, `trace`) but also provides additional functions.
 
-## console.help()
+### ``console.help()``
 Displays a [short tutorial with examples](/media/help.png).
 
-## console.box(content, option)
+### ``console.box(content, option)``
 Create a sub box.
 
-## console.line({...*}[, option])
+### ``console.line({...*}[, option])``
 Add a line.
 
-## console.out()
+### ``console.out()``
 Flush current buffer (use this to actually **see** something).
 
-## console.title({String} line)
+### ``console.title({String} line)``
 Creates a title by adding two lines (above & below) the text.
 
-## console.beep({String} [label])
+### ``console.beep({String} [label])``
 Makes your terminal beep, outputs `beep: label`.
 
-## console.time({String} [label], {Boolean} [reset])
+### ``console.time({String} [label], {Boolean} [reset])``
 Very useful stopwatch that shows the elapsed time in a readable format (ms + years, months, days...).
 **When called twice, the time in between the two calls is also meassured & displayed!**
 
@@ -97,10 +101,10 @@ console.time('TimerTony') (2nd call)        // outputs 'TimerTony: Xms'
 console.time('TimerTony', true) (2nd call)  // outputs 'TimerTony: Xms - reset', resets the timer
 ```
 
-## console.trace({String} [label])
+### ``console.trace({String} [label])``
 Beautified `console.trace`.
 
-## console.options({Object|String|Number} data)
+### ``console.options({Object|String|Number} data)``
 
 | Option         | Type          | Default   | Help                                            |
 | -------------- |:------------- | ---------:|:----------------------------------------------- |
@@ -117,7 +121,7 @@ Beautified `console.trace`.
 - `1`, `2` ⇔ sets `{border:Number}`
 - chalk `color` or `command` (see console.col) ⇔ sets `{color:String,colorText::String}`
 
-## console.col({String} input, {...String} color)
+### ``console.col({String} input, {...String} color)``
 Colorizes the `input`, can take multiple colors / commands  ([see module `chalk`](https://github.com/chalk/chalk)).
 
 - Colors: `cyan`, `green`, `yellow`, `red`, `magenta`, `blue`, `white`, `grey`, `black`
@@ -160,12 +164,3 @@ console2.title('Hello World');
 - [async](https://github.com/caolan/async)
 - [chalk](https://github.com/chalk/chalk)
 - [linewrap](https://github.com/AnAppAMonth/linewrap)
-
-<h1 align="center">
-	console.help()
-	<br>
-	<br>
-	<img src="media/help.png" alt="console.help()">
-	<br>
-	<br>
-</h1>
