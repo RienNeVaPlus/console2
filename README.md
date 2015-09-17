@@ -90,7 +90,7 @@ var box = console.box();
 
 These boxes are 2 dimensional (meaning they depend on the previous / following lines), you can no longer *just stdout a line* when building a box. Doing so would result in a big mess of lines without any context to each other, because of the [nature of time](https://en.wikipedia.org/wiki/Asynchronous_operation). Imagine you want to log the process of updating a database inside a single box, whilst complimenting yourself:
 
-```
+```js
 box.log('Trying database update');
 setTimeout(function mimicDatabaseUpdate(){
    box.log('Database updated');
@@ -113,7 +113,7 @@ console.log('You look gorgeous!');
 As you see, you need to wait until you are done adding new lines before you can print a box. The solution is simple: ~~You~~ **We queue stuff**.
 Instead of `console.log`, use `console.line`. It does the same thing, except for calling `stdout` (it's not printing the line).
 
-```
+```js
 box.line('Trying database update');
 setTimeout(function mimicDatabaseUpdate(){
    box.line('Database updated');
@@ -125,7 +125,7 @@ console.log('You look gorgeous!');
 
 #### "No you don't. Over and out!"
 
-```
+```js
    // ...
    box.line('Database updated').out();
    // ..
@@ -139,7 +139,7 @@ By calling `console.out()` (or in this case `box.out()`) **you tell** the parent
 
 You might run into situations where you want to mark a box as printable but don't want to print everything. For example when you're working on multiple child-boxes at once: you have to wait until every child box is done, before you can output the whole thing. That's what `box.over` is for:
 
-```
+```js
 var box = console.box('I am a box with children');
 var child1 = box.box('I am child #1');
 var child2 = box.box('I am child #2');
