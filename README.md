@@ -37,7 +37,7 @@ console.help();
 
 ## Usage
 
-Console2 integrates seamlessly into the node `console`. However, you should make yourself familiar with the additional features, especially `box`, `line` & `out`.
+Console2 integrates seamlessly into the node `console`. However, you should make yourself familiar with the additional features, especially `box`, `line`, `over` & `out`.
 
 ```javascript
 require('console2')();
@@ -46,17 +46,24 @@ require('console2')();
 console.log("They're minerals! Jesus Christ, Marie.");
 // as you know and love it, native methods are fully supported
 
+// logs a string "the new way"
+console.line("You shall not pass (immediately)");
+// this queues your string until you call "console.out"
+// since boxes are 2 dimensional, you can't always print everything.
+// you need to collect your boxes, then print them, when you're good to go
+// read more on this: "It's simple, over and out."
+
 // insert empty line & start a timer
 console.spacer().time('TimerTim');
 
-// build a box
+// build a box - returns a new console instance
 var box = console.box('I am a child.');
 
 // add a line to our new box
 box.line('I am the 2nd line of the sub box!');
 
 // indicate that the box can be printed and there will be no more lines/boxes appended to it
-box.ready();
+box.over();
 
 // insert empty line & print timer
 console.spacer().time('TimerTim');
@@ -71,6 +78,90 @@ console.out();
 #### Result
 
 <img src="media/usage.png" />
+
+# Managing boxes. **Over** and **Out**.
+
+The main feature is the generation of *easy-to-read ASCII box-drawing character sections* - short: **boxes**.
+
+```
+// returns a new console instance which acts as a child box
+var box = console.box();
+```
+
+These boxes are 2 dimensional (meaning they depend on the previous / following lines), you can no longer *just stdout a line* when building a box. Doing so would result in a big mess of lines without any context to each other, because of the [nature of time](https://en.wikipedia.org/wiki/Asynchronous_operation). Imagine you want to log the process of updating a database inside a single box, whilst complimenting yourself:
+
+```
+box.log('Trying database update');
+setTimeout(function mimicDatabaseUpdate(){
+   box.log('Database updated');
+}, 1);
+console.log('You look gorgeous!');
+
+// expected output:
+// ├ You look gorgeous
+// ├─ Starting database update
+// └─ Database updated
+
+// actual output:
+// ├─ Starting database update
+// ├ You look gorgeous
+// └─ Database updated
+```
+
+#### *"Houston we have a problem."*
+
+As you see, you need to wait until you are done adding new lines before you can print a box. The solution is simple: ~~You~~ **We queue stuff**.
+Instead of `console.log`, use `console.line`. It does the same thing, except for calling `stdout` (it's not printing the line).
+
+```
+box.line('Trying database update');
+setTimeout(function mimicDatabaseUpdate(){
+   box.line('Database updated');
+}, 1);
+console.log('You look gorgeous!');
+```
+
+*But now there's only the part where I compliment myself?* Right, here's what happened: You've added a line, then printed everything *that's ready* (`console.log` did that) and finally added another line to your box. But you didn't mark the box as **over** / *ready* and therefore console2 thinks you might want to add more lines.
+
+#### "No you don't. Over and out!"
+
+```
+   // ...
+   box.line('Database updated').out();
+   // ..
+```
+
+By calling `console.out()` (or in this case `box.out()`) **you tell** the parent of all boxes **to print** every child box *that's ready*.
+
+**Pro-Tip:** *`out` can take the same arguments as `line` does. So you could simplify the above to: `box.out('Database updated')`.*
+
+#### *"And what about over? Over."*
+
+You might run into situations where you want to mark a box as printable but don't want to print everything. For example when you're working on multiple child-boxes at once: you have to wait until every child box is done, before you can output the whole thing. That's what `box.over` is for:
+
+```
+var box = console.box('I am a box with children');
+var child1 = box.box('I am child #1');
+var child2 = box.box('I am child #2');
+
+async.each(arr, function iterate(data, callback){
+	child1.line('Processing item #1:', data);
+}, function onEnd(){
+	child1.over();
+});
+
+// you don't know if i'm faster or slower than the onEnd above!
+setTimeout(function(){
+	child2.line('Hello friend').over();
+}, 123);
+
+// i am some handy event in the future (or even an interval if you're a crazy person):
+function(){
+	console.out();
+}
+```
+
+**Pro-Tip:** *`over` can take the same arguments as `line` does. So you could simplify the above to: `box.over('Hello friend')`.*
 
 # Reference
 
@@ -93,8 +184,8 @@ Add a line.
 
 ***
 
-#### ``console.ready({...*}[, option])``
-Adds a line and sets the option `{ready:true}`
+#### ``console.over({...*}[, option])``
+Adds a line and sets the option `{over:true}`
 
 ***
 
@@ -158,11 +249,11 @@ Beautified `console.trace`.
 | color          | String        | grey      | Primary color                                   |
 | colorText      | String        | grey      | Text color                                      |
 | border         | Number        | 1         | Vertical border-width: `1` (`│`) or `2` (`║`)  |
-| ready          | Boolean       | `false`   | Allow output of box when a parent uses `out()`  |
 | console        | Object        | `console` | Object to receive the output of console2.out.<br>Needs to have the same properties as the `console`. |
-| addNewline     | Boolean       | false     | Adds a `\n` before every before every call of `console.out`.
-| disableAutoOut | Boolean       | false     | Console2 tries to detect whether to automatically call<br>`console.out` after new lines have been added. You can disable this.
-| override       | Boolean       | true      | Whether to override nodes `console`.<br>Can only be set when first calling the function returned by the module. |
+| over           | Boolean       | `false`   | Allow output of box when a parent uses `out()`  |
+| addNewline     | Boolean       | `false`   | Adds a `\n` before every before every call of `console.out`.
+| disableAutoOut | Boolean       | `false`   | Console2 tries to detect whether to automatically call<br>`console.out` after new lines have been added. You can disable this.
+| override       | Boolean       | `true`    | Whether to override nodes `console`.<br>Can only be set when first calling the function returned by the module. |
 
 **Shortcuts**
 
@@ -209,13 +300,11 @@ Alias exist to cover features of the native `console` or to provide shortcuts fo
 | Shortcut             | ⇔  | Alias                    |
 |:-------------------- | --:|:------------------------ |
 | console **._**       | ⇔ | console **.line**         |
-| console **.$**       | ⇔ | console **.out**          |
-| console **.flush**   | ⇔ | console **.out**          |
 | console **.info**    | ⇔ | console **.log** (green)  |
 | console **.warn**    | ⇔ | console **.log** (yellow) |
 | console **.error**   | ⇔ | console **.log** (red)    |
 | console **.dir**     | ⇔ | console **.log**          |
-| console **.timeEnd** | ⇔ | console **.log**          |
+| console **.timeEnd** | ⇔ | console **.time**          |
 
 ## Separate mode
 

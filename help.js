@@ -33,12 +33,11 @@ module.exports = (function(){
 		._()
 		.box();
 
-	ref.ready();
+	ref.over();
 
 	// reference
 	var lineArgs = '['+col('line', 'white')+'], ['+console.col('option', 'white')+']';
 	var docs = {
-		$: '~out',
 		beep: ['Beep noise, outputs "BEEP"', '['+console.col('title', 'white')+']'],
 		box: ['Create a sub box', lineArgs],
 		col: ['Colorize a string', col('input', 'white')+', {...'+col('color', 'white')+'}'],
@@ -51,7 +50,11 @@ module.exports = (function(){
 		line: ['Add a new line', lineArgs],
 		log: ['Alias for .line AND .out', lineArgs],
 		options: ['Set option/s', col('object', 'white')],
-		out: 'Print current stack',
+		out: ['Print current stack', lineArgs],
+		over: ['Mark box printable for out()', lineArgs],
+		pad: ['Pad a string', col('string', 'white')+', '+console.col('length', 'white')],
+		spacer: 'Add empty line',
+		strip: ['Remove colors from a string', col('string', 'white')],
 		time: ['Display timer', '['+col('timerName', 'white')+'], ['+col('reset', 'white')+']'],
 		timeEnd: '~time',
 		title: ['Display text inside a box', lineArgs],
@@ -87,19 +90,19 @@ module.exports = (function(){
 		console.line('New Line');
 
 		var red = console.box('Red Box Title', 'red');
-		red.line('Red Box Line').ready();
+		red.line('Red Box Line').over();
 
 		var yellow = red
-			.box('Yellow Box Title', {ready:true,color:'yellow',colorText:'yellow',border:2})
+			.box('Yellow Box Title', {over:true,color:'yellow',colorText:'yellow',border:2})
 			.line('Yellow Box Line');
-		var green = yellow.box({color:'green',ready:true}).line('Hello World');
+		var green = yellow.box({color:'green'}).over().line('Hello World');
 
 		red.line('Red Box Bottom');
 	};
 
 	// example
-	console.spacer().title('Example 1: Box-Tree', 'bold');
-	console._(example1)._();
+	console.spacer().title('Example 1: Box tree', 'bold');
+	console.line(example1).line();
 
 	example1();
 
@@ -112,7 +115,7 @@ module.exports = (function(){
 
 	// example
 	console.spacer().title('Example 2: Object inspection', 'bold');
-	console._(example2)._();
+	console.line(example2).line();
 
 	example2();
 
@@ -127,7 +130,7 @@ module.exports = (function(){
 
 	// example
 	console.spacer().title('Example 3: Stopwatch', 'bold');
-	console._(example3)._();
+	console.line(example3).line();
 
 	example3();
 
@@ -140,10 +143,10 @@ module.exports = (function(){
 
 	// example
 	console.spacer().title('Example 4: Stack trace', 'bold');
-	console._(example4)._();
+	console.line(example4).line();
 
 	example4();
 
 	console.spacer().title(console.col('Have fun!', 'rainbow'));
-	console.$();
+	console.out();
 })();

@@ -26,6 +26,10 @@ function Log(parent, opt){
 	this.strip = Log.strip;
 	this.pad = Log.pad;
 
+	// set color to colorText by default
+	if(typeof opt == 'object' && opt.color && !opt.colorText)
+		opt.colorText = opt.color;
+
 	// default options
 	this.opt = Log.extend({
 		console:    null,                                   // object to receive the output of console2
@@ -35,7 +39,7 @@ function Log(parent, opt){
 		addNewline: false,                                  // add new line after every out call
 		enableAutoOut: false,                               // enable auto out calls
 		override:   true,                                   // override nodes console
-		ready:      false                                   // box status
+		over:       false                                   // box status
 	}, opt||{});
 
 	// is direct log
@@ -414,10 +418,7 @@ Log.prototype.options = function(opt){
 
 	// handle options('string') - color and 'ready'
 	if(typeof opt == 'string'){
-		if(opt == 'ready')
-			opt = {ready:true};
-		else
-			opt = {color:opt};
+		opt = {color:opt};
 	}
 	// handle options(2) - border width
 	else if(opt === 1 || opt === 2){
@@ -449,10 +450,9 @@ Log.prototype.box = function(line, opt){
 	if(arguments.length == 1){
 		// line could be either an option or a line
 		if(typeof line == 'string'){
-			// check if line is option
-			if(line == 'ready' || Log.chalkColors.indexOf(line) > -1 || Log.chalkCommands.indexOf(line) > -1){
-				opt = line;
-				line = null;
+			// check if line is color
+			if(Log.chalkColors.indexOf(line) > -1 || Log.chalkCommands.indexOf(line) > -1){
+				opt = {color:line};
 			}
 		}
 		// line is no string and therefore an option
@@ -628,6 +628,7 @@ Log.prototype.error = function(){
 	// add red
 	args.push('red');
 
+	Log.console.log('THIS', this);
 	// log
 	this.line.apply(this, args);
 	this.out('error');
@@ -811,7 +812,7 @@ Log.prototype.trace = function(message){
 		if(i == 0)
 			return box = this.line(line);
 
-		box = box.box(line).ready();
+		box = box.box(line).over();
 	}.bind(this));
 
 	box._autoOut();
@@ -896,7 +897,7 @@ Log.prototype._buildString = function(callback, preserveLines){
 		async.each(log.lines, function(line, callbackLines){
 			// sub box
 			if(this._instanceof(line)){
-				return line.opt.ready ? walk(line, callbackLines) : callbackLines();
+				return line.opt.over ? walk(line, callbackLines) : callbackLines();
 			}
 
 			// format
@@ -1140,7 +1141,7 @@ Log.prototype._buildString = function(callback, preserveLines){
  *
  * @returns {undefined|Log}
  */
-Log.prototype.ready = function(){
+Log.prototype.over = function(){
 	var args = Array.prototype.slice.call(arguments);
 
 	// mimic .line
@@ -1148,7 +1149,7 @@ Log.prototype.ready = function(){
 		this.line.apply(this, args);
 
 	// set ready
-	this.opt.ready = true;
+	this.opt.over = true;
 
 	// end
 	return this._return();
@@ -1164,7 +1165,13 @@ Log.prototype.out = function(method){
 	if(!method) method = 'log';
 
 	// mark as ready to print
-	this.opt.ready = true;
+	this.opt.over = true;
+
+	// enable .line args
+	if(method && Object.keys(Log.console).indexOf(method) < 0){
+		var args = Array.prototype.slice.call(arguments);
+		this.line.apply(this, args);
+	}
 
 	// use parent out when available
 	if(this.parent){
@@ -1190,20 +1197,6 @@ Log.prototype.out = function(method){
 
 	return this._return();
 };
-
-/**
- * $ - Alias for this.out
- *
- * @type {Function}
- */
-Log.prototype.$ = Log.prototype.out;
-
-/**
- * flush - Alias for this.out
- *
- * @type {Function}
- */
-Log.prototype.flush = Log.prototype.out;
 
 /**
  * Return a specific parent for _buildString structure
@@ -1383,7 +1376,7 @@ Log.prototype._object = function(obj, data){
 
 		// create sub box
 		var keys = Object.keys(objSub);
-		var box = parent.box().ready();
+		var box = parent.box().over();
 
 		// calc colors
 		var color = data.colors[(box.level-this.level-1) % data.colors.length];
