@@ -1186,7 +1186,7 @@ Log.prototype.out = function(method){
 			str = this.opt.addNewline ? str : str.substr(1);
 			// the output
 			if(str !== "\n" && str !== ''){
-				Log.console.log('--->',[str]);
+//				Log.console.log('--->',[str]);
 				Log.console[method](str);
 			}
 
