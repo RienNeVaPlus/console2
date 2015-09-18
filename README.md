@@ -49,9 +49,7 @@ console.log("They're minerals! Jesus Christ, Marie.");
 // logs a string "the new way"
 console.line("You shall not pass (immediately)");
 // this queues your string until you call "console.out"
-// since boxes are 2 dimensional, you can't always print everything.
-// you need to collect your boxes, then print them, when you're good to go
-// read more on this: "It's simple, over and out."
+// read more on this below
 
 // insert empty line & start a timer
 console.spacer().time('TimerTim');
