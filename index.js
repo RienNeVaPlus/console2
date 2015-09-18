@@ -1095,8 +1095,9 @@ Log.prototype._buildString = function(callback, preserveLines){
 								s = '├';
 							else if(char == '├')
 								s = '├';
-							else
+							else{
 								s = '┌';
+							}
 						}
 						else if(isLeftLast && !isTopLast)
 							s = '│';
@@ -1185,7 +1186,7 @@ Log.prototype.out = function(method){
 			str = this.opt.addNewline ? str : str.substr(1);
 			// the output
 			if(str !== "\n" && str !== ''){
-//				Log.console.log('--->',[str]);
+				Log.console.log('--->',[str]);
 				Log.console[method](str);
 			}
 
@@ -1398,10 +1399,10 @@ Log.prototype._object = function(obj, data){
 
 		// title "──────[object Object]─┤"
 		if(!title){
-			title = Log.col(objStr, color);
-			title =	Log.col(Log.pad('─', data.pad - box.level - (colors.stripColor(title).length)-3), color, 'dim')
+			title = objStr;
+			title =	Log.col(Log.pad('─', data.pad - box.level - (title.length)-3), 'dim')
 						+ title
-						+ Log.col('─┐', color, 'dim');
+						+ Log.col('─┐', 'dim');
 		}
 
 		// add title
@@ -1420,34 +1421,32 @@ Log.prototype._object = function(obj, data){
 			return functStr.forEach(function(line, i){
 				box.line(
 					// prefix
-					Log.col(
-							Log.pad('─', spacer - ((i+1)+'').length)
-						+ Log.col(i+1,'grey')
-						+ '─'
-						, color)
+						Log.col(i+1,'grey')
+					+ '─'
 					// code & spacer
 					+ Log.col(
-							Log.truncate(line, data.pad - box.level - 4 - spacer)
-							+ Log.pad(' ', functPad - line.length - box.level - 4 - spacer),
-							'code'
+								Log.truncate(line, data.pad - box.level - 4 - spacer)
+							+ Log.pad(' ', functPad - line.length - box.level - 4 - spacer)
+							,	'code'
 						)
-					, 'pre:─'
+					, 'pre:─'+Log.pad('─', spacer - ((i+1)+'').length)
 				)
 			});
 		}
 		// no properties found
 		else if(!keys.length){
-			var emptyStr = '┤ empty object ├';
+			var emptyStr = '{ empty object }';
 			var emptyPad = (data.pad - box.level - emptyStr.length)-3;
 			var padLeft = Math.floor(emptyPad / 2);
 			var padRight = padLeft < emptyPad/2 ? padLeft+1 : padLeft;
 
 			emptyStr = Log.col(
-						Log.pad('─', padLeft)
-					+ emptyStr.replace('empty object', Log.col('empty object', 'bold'))
+					  Log.pad('─', padLeft)
+					+ Log.col(emptyStr, 'bold')
 					+ Log.pad('─', padRight)
 					+ (box.level-this.level>1?'┤':'─')
-					+ Log.col((box.level-this.level>1?'│':'┤'), data.colors[0]), color, 'dim');
+					+ Log.col(box.level-this.level>1?'│':'┤', data.colors[0])
+					, 'dim');
 			box.line(emptyStr, 'pre:');
 		}
 
@@ -1461,15 +1460,14 @@ Log.prototype._object = function(obj, data){
 				path[box.level+1] = (parseInt(key) == key+'' ? '['+key+']' : '.'+key);
 
 				// title "key────[object Object]─┤"
-				var title = Log.col(Array.isArray(val) ? '[object Array]' : val.toString(), colorNext);
-				title = Log.col(key, color, 'bold')
+				var title = Array.isArray(val) ? '[object Array]' : val.toString();
+				title = Log.col(key)
 					+ Log.col(
 							Log.pad('─',
 								data.pad - (box.level) - colors.stripColor(key).length - colors.stripColor(title).length -5)
-					, colorNext
 					, 'dim')
 					+	title
-					+ Log.col('─┬', colorNext, 'dim')
+					+ Log.col('─┬', 'dim')
 					+ Log.col('┤', data.colors[0], 'dim');
 
 				return insert.call(this, val, box, title, path);
@@ -1482,8 +1480,8 @@ Log.prototype._object = function(obj, data){
 			var valueLines = [val];
 			var line = {
 				prefix:	[
-						Log.col(key, color, 'bold')
-					+ Log.col(Log.pad('·', data.padKey-key.length-box.level)+': ', color, 'dim')
+						key
+					+ Log.col(Log.pad('·', data.padKey-key.length-box.level)+': ', 'dim')
 					, Log.pad(' ', data.padKey-box.level+2)
 				]
 			};
@@ -1532,27 +1530,18 @@ Log.prototype._object = function(obj, data){
 		}.bind(this));
 
 		// insert footer
-		var footerStr = (''
-			+ Log.col(
-					Log.truncate(path.slice(0, box.level+1).join(''), data.pad - box.level - 11)
-				+ '─('
-				+ (keys.length+'')
-				+ ')'
-			, color, 'dim')
-		);
+		var footerStr = Log.truncate(path.slice(0, box.level+1).join(''), data.pad - box.level - 11)
+			+ '─('
+			+ (keys.length+'')
+			+ ')─';
 
 		box.line(Log.col(
-				'─'
-				+ (Log.pad('─', (data.pad - (box.level) - Log.strip(footerStr).length -6)))
-				+ ('─')
-			, color, 'dim'
-			)
+			Log.pad('─', (data.pad - (box.level) - footerStr.length -3))
 		+ footerStr
-		+ Log.col('─', color, 'dim')
 		+ (box.parent && box.parent.level == this.level
-			? Log.col('─┘', color, 'dim')
-			: Log.col('┴', color, 'dim') + Log.col('┤', data.colors[0], 'dim')
-		), 'pre:');
+			? Log.col('─┘', 'dim')
+			: Log.col('┴', 'dim') + Log.col('┤', data.colors[0], 'dim')
+		), 'dim'), 'pre:');
 	}
 
 	// run calculations for layout structure
