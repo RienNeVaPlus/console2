@@ -249,7 +249,7 @@ Beautified `console.trace`.
 | border         | Number        | 1         | Vertical border-width: `1` (`│`) or `2` (`║`)  |
 | console        | Object        | `console` | Object to receive the output of console2.out.<br>Needs to have the same properties as the `console`. |
 | over           | Boolean       | `false`   | Allow output of box when a parent uses `out()`  |
-| addNewline     | Boolean       | `false`   | Adds a `\n` before every before every call of `console.out`.
+| addNewline     | Boolean       | `false`   | Adds a `\n` before every call of `console.out`.
 | disableAutoOut | Boolean       | `false`   | Console2 tries to detect whether to automatically call<br>`console.out` after new lines have been added. You can disable this.
 | override       | Boolean       | `true`    | Whether to override nodes `console`.<br>Can only be set when first calling the function returned by the module. |
 
