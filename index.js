@@ -1,6 +1,7 @@
 // set encoding to utf8
 process.stdout.setEncoding('utf8');
 
+var readline = require('readline');
 var async = require('async');
 var colors = require('chalk');
 var pkg = require('./package');
@@ -19,6 +20,7 @@ function Log(parent, opt){
 	this.lines = [];
 	this.parent = null;
 	this.level = 0;
+	this.printedLines = 0;
 //	this.colors = colors;
 
 	// make utils accessible
@@ -36,9 +38,10 @@ function Log(parent, opt){
 		border:     typeof opt == 'number' ? opt : 1,       // vertical border width (1 or 2)
 		color:      typeof opt == 'string' ? opt : 'grey',  // border color
 		colorText:  typeof opt == 'string' ? opt : 'grey',  // text color
-		addNewline: false,                                  // add new line after every out call
-		enableAutoOut: false,                               // enable auto out calls
+		enableAutoOut: false,                               // enable auto out calls (used when in node console)
+		disableWelcome: false,                              // disable our kind welcome line
 		override:   true,                                   // override nodes console
+		animate:    true,                                   // animate idle status
 		over:       false                                   // box status
 	}, opt||{});
 
@@ -60,6 +63,18 @@ function Log(parent, opt){
 		_: new Date().getTime(),
 		_calls: {}
 	};
+
+	// animate
+	if(this.level === 0){
+		process.on('SIGINT', function(){
+			Log.clearLine();
+			process.stdout.write(Log.col('┘', this.opt.color)+"\n");
+			process.exit();
+		}.bind(this));
+
+		// passive set interval
+		setInterval(this._animate.bind(this), 500).unref();
+	}
 }
 
 //─── Static methods ──────────────────────────────────────────────────
@@ -172,6 +187,16 @@ Log.extend = function(destination, source){
 //
 //	return res.slice(0, res.length-7).join('') + "\x1b[0m" + postfix;
 //};
+
+/**
+ * Clear terminal line + set cursor to 0
+ */
+Log.clearLine = function(){
+	process.stdout.clearLine();
+	process.stdout.cursorTo(0);
+
+	return process.stdout;
+};
 
 /**
  * Truncate string
@@ -860,7 +885,8 @@ Log.prototype.spacer = function(){
 	// end line
 	this.out();
 	// empty line
-	this.opt.console.log('');
+	this.opt.console.log(this.col('┘', this.opt.col||'grey'));
+	this.printedLines = 0;
 
 	return this;
 };
@@ -942,6 +968,10 @@ Log.prototype._buildString = function(callback, preserveLines){
 		// iterate
 		async.each(lines, function(obj, callbackLine){
 			var i = lines.indexOf(obj);
+
+			// count total output
+			this.printedLines++;
+
 			// structure
 			var pre = {
 				str: '',
@@ -966,15 +996,19 @@ Log.prototype._buildString = function(callback, preserveLines){
 
 				// 1st from right
 				if(posLeft == obj.level){
-					if(obj.hasPrev == false && obj.hasNext == true)
+					if(this.printedLines === 1)
 						s = '┌';
+					else if(obj.hasNext && obj.level == 0)
+						s = '├';//┌
 					else if(obj.boxNr == 0){
 						if(obj.hasBoxNext || obj.levelNext > obj.level)
-							s = '┬';
+							s = '┬';//┬
 						else if(obj.hasBoxPrev)
-							s = '└';
+							s = '└';//└
+						else if(obj.level == 0)
+							s = '├';
 						else
-							s = '─';
+							s = '─';//─
 					}
 					else if(obj.hasNext && obj.levelNext >= obj.level && Log.strip(obj.line) == 'undefined')
 						s = '│';
@@ -992,13 +1026,15 @@ Log.prototype._buildString = function(callback, preserveLines){
 						s = '├';
 					else if(['═','╛'].indexOf(obj.prefix.substr(0,1)) > -1)
 						s = '╘';
+					else if(obj.level == 0)
+						s = '├';
 					else
 						s = '└';
 				}
 				// 2nd from right when first of box
 				else if(obj.boxNr == 0 && posLeft == obj.level-1){
 					if(!obj.hasPrev)
-						s = '┌';
+						s = '├';//┌
 					else if(!obj.hasNext || obj.hasNext.log.level < obj.level)
 						s = '┴';
 					else {
@@ -1007,11 +1043,11 @@ Log.prototype._buildString = function(callback, preserveLines){
 				}
 				// 2nd from right when no next (is closing)
 				else if(!obj.hasBoxNext && obj.levelNext < obj.level-1 && posLeft == obj.level-1)
-					s = '┘';
+					s = '┘';//┘
 				else if(!obj.hasBoxNext && obj.levelNext < obj.level-1){
 					if(!obj.hasNext)
 						if(posLeft == 0)
-							s = '└';
+							s = '├';//└
 						else if(posLeft < obj.level)
 							s = '┴';
 						else
@@ -1030,11 +1066,10 @@ Log.prototype._buildString = function(callback, preserveLines){
 				}
 				// any other char
 				else {
-					if(posLeft == 0 && !obj.hasNext)
-						s = '┘';
-					else {
+//					if(posLeft == 0 && !obj.hasNext)
+//						s = '┘';
+//					else
 						s = '│';
-					}
 				}
 
 				if(s){
@@ -1104,6 +1139,9 @@ Log.prototype._buildString = function(callback, preserveLines){
 						else if(isLeftLast && isTopLast){
 							if(obj.hasNext && (obj.hasNext.level == obj.level+1 || obj.hasNext.level == obj.level))
 								s = '│';
+							else if(obj.level == 0){
+								s = '├';
+							}
 							else
 								s = '└';
 						}
@@ -1183,11 +1221,14 @@ Log.prototype.out = function(method){
 	this._try(
 		this._buildString,
 		function(str){
-			str = this.opt.addNewline ? str : str.substr(1);
+			str = str.substr(1);
+
 			// the output
-			if(str !== "\n" && str !== ''){
+			if(str){
+				Log.clearLine();
 //				Log.console.log('--->',[str]);
-				Log.console[method](str);
+				process.stdout.write(str+'\n');
+//				Log.console[method](str+"\n");
 			}
 
 
@@ -1217,6 +1258,24 @@ Log.prototype.getParent = function(generations){
 
 	return log;
 };
+
+
+Log.prototype._animate = function(){
+	Log.clearLine();
+
+	if(this.level || !this.opt.animate) {
+		return;
+	}
+
+	var animation = ['└','┘'];
+
+	if(!this._animation || this._animation > animation.length-1)
+		this._animation = 0;
+
+	process.stdout.write(this.col(animation[this._animation], this.opt.color));
+	this._animation++;
+};
+
 
 /**
  * Make sure promised are not used when on node console
@@ -1575,6 +1634,9 @@ var log = new Log();
 module.exports = function(opt){
 	// config
 	log.options(opt);
+
+	if(!log.opt.disableWelcome)
+		log.log(log.col(pkg.name, 'rainbow')+' v'+pkg.version+' - Hi mate');
 
 	if(log.opt.override)
 		log.overrideConsole();
