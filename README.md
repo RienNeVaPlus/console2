@@ -248,9 +248,11 @@ Beautified `console.trace`.
 | colorText      | String        | grey      | Text color                                      |
 | border         | Number        | 1         | Vertical border-width: `1` (`│`) or `2` (`║`)  |
 | console        | Object        | `console` | Object to receive the output of console2.out.<br>Needs to have the same properties as the `console`. |
+| map            | Array         | `[['...','…']]` | Simple replace for input strings (e.g. `...` to a single char `…`) |
+| isWorker       | Boolean       | `false`   | Act as a [worker](https://nodejs.org/api/cluster.html#cluster_cluster_isworker) |
 | over           | Boolean       | `false`   | Allow output of box when a parent uses `out()`  |
-| disableAutoOut | Boolean       | `false`   | Console2 tries to detect whether to automatically call<br>`console.out` after new lines have been added. You can disable this.
-| override       | Boolean       | `true`    | Whether to override nodes `console`.<br>Can only be set when first calling the function returned by the module. |
+| disableAutoOut | Boolean       | `false`   | Console2 tries to detect whether to automatically call<br>`console.out` after new lines have been added.
+| override       | Boolean       | `true`    | Whether to override nodes `console`.<br><sub>Can only be set when first calling the main function.</sub> |
 
 **Shortcuts**
 
