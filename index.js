@@ -1,7 +1,6 @@
 // set encoding to utf8
 process.stdout.setEncoding('utf8');
 
-var readline = require('readline');
 var async = require('async');
 var colors = require('chalk');
 var pkg = require('./package');
@@ -21,7 +20,7 @@ function Log(parent, opt){
 	this.parent = null;
 	this.level = 0;
 	this.printedLines = 0;
-//	this.colors = colors;
+	//	this.colors = colors;
 
 	// make utils accessible
 	this.col = Log.col;
@@ -38,10 +37,12 @@ function Log(parent, opt){
 		border:     typeof opt == 'number' ? opt : 1,       // vertical border width (1 or 2)
 		color:      typeof opt == 'string' ? opt : 'grey',  // border color
 		colorText:  typeof opt == 'string' ? opt : 'grey',  // text color
+		isWorker:   false,                                  // run as a worker
+		map:        [['...','…']],                         // auto replace
 		enableAutoOut: false,                               // enable auto out calls (used when in node console)
 		disableWelcome: false,                              // disable our kind welcome line
 		override:   true,                                   // override nodes console
-		animate:    true,                                   // animate idle status
+		animate:    false,                                  // animate idle status
 		over:       false                                   // box status
 	}, opt||{});
 
@@ -64,16 +65,18 @@ function Log(parent, opt){
 		_calls: {}
 	};
 
-	// animate
 	if(this.level === 0){
-		process.on('SIGINT', function(){
-			Log.clearLine();
-			process.stdout.write(Log.col('┘', this.opt.color)+"\n");
-			process.exit();
-		}.bind(this));
+		// animate
+		if(this.opt.animate){
+			process.on('SIGINT', function(){
+				Log.clearLine();
+				process.stdout.write(Log.col('┘', this.opt.color)+"\n");
+				process.exit();
+			}.bind(this));
 
-		// passive set interval
-		setInterval(this._animate.bind(this), 500).unref();
+			// passive set interval
+			setInterval(this._animate.bind(this), 500).unref();
+		}
 	}
 }
 
@@ -103,7 +106,7 @@ Log.col = function(str, cmd){
 			return str.split('').map(function(char, i){
 				return colors[cols[i % cols.length]](char);
 			}).join('');
-		break;
+			break;
 
 		// zebra
 		// using white, then bgWhite & black
@@ -111,7 +114,7 @@ Log.col = function(str, cmd){
 			return str.split('').map(function(char, i){
 				return i % 2 ? colors.white(char) : colors.bgWhite.black.dim(char);
 			}).join('');
-		break;
+			break;
 
 		case 'code':
 			return colors.bgBlue.white(str.split('').map(function(char){
@@ -119,7 +122,7 @@ Log.col = function(str, cmd){
 					return colors.grey(char);
 				return char;
 			}).join(''));
-		break;
+			break;
 	}
 
 	// add attributes
@@ -556,6 +559,14 @@ Log.prototype.line = function(line, option){
 		// join word string
 		else if(stash.length){
 			obj.line = stash.join(' ');
+
+			// replace map (... > …)
+			if(Array.isArray(this.opt.map)){
+				this.opt.map.forEach(function(arr){
+					obj.line = obj.line.replace(arr[0],arr[1]);
+				});
+			}
+
 			this.lines.push(obj);
 		}
 		// log
@@ -653,7 +664,6 @@ Log.prototype.error = function(){
 	// add red
 	args.push('red');
 
-	Log.console.log('THIS', this);
 	// log
 	this.line.apply(this, args);
 	this.out('error');
@@ -815,7 +825,7 @@ Log.prototype.trace = function(message){
 			line.split(' ').forEach(function(word, indexWord){
 				switch(indexWord){
 					case 0:
-//							words.push(colors.grey(word));
+						//							words.push(colors.grey(word));
 						break;
 
 					case 1:
@@ -840,7 +850,8 @@ Log.prototype.trace = function(message){
 		box = box.box(line).over();
 	}.bind(this));
 
-	box._autoOut();
+	if(box)
+		box._autoOut();
 
 	return this;
 };
@@ -941,15 +952,15 @@ Log.prototype._buildString = function(callback, preserveLines){
 
 			// remove printed lines from stack
 			if(!preserveLines){
-//				Log.console.log('REMOVE', log.lines);
+				//				Log.console.log('REMOVE', log.lines);
 				log.lines = log.lines.filter(function(l){
 					if(log._instanceof(l)) return l.id != log.id;
 					return l != line;
 				});
-//				this.lines = this.lines.filter(function(l){
-//					if(this._instanceof(l)) return l.id != log.id;
-//					return l.line == line.line;// || l.id == log.id;
-//				}.bind(this));
+				//				this.lines = this.lines.filter(function(l){
+				//					if(this._instanceof(l)) return l.id != log.id;
+				//					return l.line == line.line;// || l.id == log.id;
+				//				}.bind(this));
 			}
 
 			// count
@@ -967,211 +978,219 @@ Log.prototype._buildString = function(callback, preserveLines){
 	walk(this, function(){
 		// iterate
 		async.each(lines, function(obj, callbackLine){
-			var i = lines.indexOf(obj);
+				var i = lines.indexOf(obj);
 
-			// count total output
-			this.printedLines++;
+				// count total output
+				this.printedLines++;
 
-			// structure
-			var pre = {
-				str: '',
-				plain: ''
-			};
+				// structure
+				var pre = {
+					str: '',
+					plain: ''
+				};
 
-			// shortcuts
-			obj.levelPrev = lines[i-1] ? lines[i-1].level : null;
-			obj.levelNext = lines[i+1] ? lines[i+1].level : null;
-			obj.hasPrev = lines[i-1] || false;
-			obj.hasNext = lines[i+1] || false;
-			obj.hasBoxPrev = obj.hasPrev && obj.hasPrev.id == obj.id;
-			obj.hasBoxNext = obj.hasNext && obj.hasNext.id == obj.id;
+				// shortcuts
+				obj.levelPrev = lines[i-1] ? lines[i-1].level : null;
+				obj.levelNext = lines[i+1] ? lines[i+1].level : null;
+				obj.hasPrev = lines[i-1] || false;
+				obj.hasNext = lines[i+1] || false;
+				obj.hasBoxPrev = obj.hasPrev && obj.hasPrev.id == obj.id;
+				obj.hasBoxNext = obj.hasNext && obj.hasNext.id == obj.id;
 
-			// iterate level times (|)
-			for(var posLeft = 0; posLeft <= obj.level; posLeft++){
-				// str
-				var s;
+				// iterate level times (|)
+				for(var posLeft = 0; posLeft <= obj.level; posLeft++){
+					// str
+					var s;
 
-				// set base obj
-				mapBase = obj.log.getParent(obj.level-posLeft);
+					// set base obj
+					mapBase = obj.log.getParent(obj.level-posLeft);
 
-				// 1st from right
-				if(posLeft == obj.level){
-					if(this.printedLines === 1)
-						s = '┌';
-					else if(obj.hasNext && obj.level == 0)
-						s = '├';//┌
-					else if(obj.boxNr == 0){
-						if(obj.hasBoxNext || obj.levelNext > obj.level)
-							s = '┬';//┬
-						else if(obj.hasBoxPrev)
-							s = '└';//└
+					// 1st from right
+					if(posLeft == obj.level){
+						if(this.printedLines === 1)
+							s = '┌';
+						else if(obj.hasNext && obj.level == 0){
+							if(Log.strip(obj.line) == 'undefined')
+								s = '│';
+							else
+								s = '├';//┌
+						}
+						else if(obj.boxNr == 0){
+							if(obj.hasBoxNext || obj.levelNext > obj.level)
+								s = '┬';//┬
+							else if(obj.hasBoxPrev)
+								s = '└';//└
+							else if(obj.level == 0){
+								if(obj.line.substr(0,2) == '  ')
+									s = '│';
+								else
+									s = '├';
+							}
+							else
+								s = '─';//─
+						}
+						else if(obj.hasNext && obj.levelNext >= obj.level && Log.strip(obj.line) == 'undefined')
+							s = '│';
+						else if(
+							obj.hasNext
+							&& (
+							obj.hasNext.log.id == obj.log.id
+							|| (
+							obj.hasNext.log
+							&& obj.hasNext.log.parent
+							&& obj.hasNext.log.parent.id == obj.log.id
+							)
+							)
+						)
+							s = '├';
+						else if(['═','╛'].indexOf(obj.prefix.substr(0,1)) > -1)
+							s = '╘';
 						else if(obj.level == 0)
 							s = '├';
 						else
-							s = '─';//─
-					}
-					else if(obj.hasNext && obj.levelNext >= obj.level && Log.strip(obj.line) == 'undefined')
-						s = '│';
-					else if(
-						obj.hasNext
-						&& (
-						obj.hasNext.log.id == obj.log.id
-						|| (
-						obj.hasNext.log
-						&& obj.hasNext.log.parent
-						&& obj.hasNext.log.parent.id == obj.log.id
-						)
-						)
-					)
-						s = '├';
-					else if(['═','╛'].indexOf(obj.prefix.substr(0,1)) > -1)
-						s = '╘';
-					else if(obj.level == 0)
-						s = '├';
-					else
-						s = '└';
-				}
-				// 2nd from right when first of box
-				else if(obj.boxNr == 0 && posLeft == obj.level-1){
-					if(!obj.hasPrev)
-						s = '├';//┌
-					else if(!obj.hasNext || obj.hasNext.log.level < obj.level)
-						s = '┴';
-					else {
-						s = '├';
-					}
-				}
-				// 2nd from right when no next (is closing)
-				else if(!obj.hasBoxNext && obj.levelNext < obj.level-1 && posLeft == obj.level-1)
-					s = '┘';//┘
-				else if(!obj.hasBoxNext && obj.levelNext < obj.level-1){
-					if(!obj.hasNext)
-						if(posLeft == 0)
-							s = '├';//└
-						else if(posLeft < obj.level)
-							s = '┴';
-						else
 							s = '└';
-					else {
-						if(posLeft == obj.levelNext)
-							s = '├';
-						else if(posLeft < obj.levelNext)
-							s = '│';
-						else if(posLeft == 0 || posLeft == obj.levelNext)
-							s = '├';
-						else{
+					}
+					// 2nd from right when first of box
+					else if(obj.boxNr == 0 && posLeft == obj.level-1){
+						if(!obj.hasPrev)
+							s = '├';//┌
+						else if(!obj.hasNext || obj.hasNext.log.level < obj.level)
 							s = '┴';
+						else {
+							s = '├';
 						}
 					}
-				}
-				// any other char
-				else {
-//					if(posLeft == 0 && !obj.hasNext)
-//						s = '┘';
-//					else
-						s = '│';
-				}
-
-				if(s){
-					pre.plain += s;
-					pre.str += mapBase._map(s);
-				}
-			}
-
-			// add final prefix (customizable)
-			pre.plain += obj.prefix;
-			pre.str += Log.col(obj.prefix, obj.log.opt.color);
-
-			// create str
-			var str = {
-				str: obj.line
-			};
-
-			// add plain str
-			str.plain = Log.strip(str.str);
-
-			switch(str.plain){
-				case 'undefined':
-					str.str = '';
-				break;
-
-				case '---':
-					str.str = '';
-					var width = Log.getTerminalWidth() - obj.level - 1;
-					for(var iLine = 0; iLine < width; iLine++){
-						str.str += '─';
-					}
-					pre.str = pre.str.substr(0,pre.str.length-6);
-					pre.plain = pre.plain.substr(0,pre.plain.length-1);
-					str.str = Log.col(str.str, obj.color, 'dim'); //+'┤');
-				break;
-			}
-
-			// truncate
-			if((pre.plain.length + str.plain.length) > maxWidth || str.plain.indexOf("\n") > -1){
-				// generate new lines
-				var addLines = Log.wrap(str.str, maxWidth - obj.level-10).split("\n");
-				str.str = '';
-
-				// iterate new lines
-				addLines.forEach(function(line, posTop){
-					var isTopLast = posTop == addLines.length-1;
-
-					line = ' '+Log.col(line, obj.color, 'bold');
-
-					// iterate prefix chars
-					pre.str = '';
-					pre.plain.split('').slice(0, -1).forEach(function(char, posLeft, all){
-						var isLeftLast = posLeft == all.length-1;
-						var s = null;
-
-						if(isLeftLast && posTop == 0){
-							if(char == '└')
-								s = '├';
-							else if(char == '├')
-								s = '├';
-							else{
-								s = '┌';
-							}
-						}
-						else if(isLeftLast && !isTopLast)
-							s = '│';
-						else if(isLeftLast && isTopLast){
-							if(obj.hasNext && (obj.hasNext.level == obj.level+1 || obj.hasNext.level == obj.level))
-								s = '│';
-							else if(obj.level == 0){
-								s = '├';
-							}
+					// 2nd from right when no next (is closing)
+					else if(!obj.hasBoxNext && obj.levelNext < obj.level-1 && posLeft == obj.level-1)
+						s = '┘';//┘
+					else if(!obj.hasBoxNext && obj.levelNext < obj.level-1){
+						if(!obj.hasNext)
+							if(posLeft == 0)
+								s = '├';//└
+							else if(posLeft < obj.level)
+								s = '┴';
 							else
 								s = '└';
+						else {
+							if(posLeft == obj.levelNext)
+								s = '├';
+							else if(posLeft < obj.levelNext)
+								s = '│';
+							else if(posLeft == 0 || posLeft == obj.levelNext)
+								s = '├';
+							else{
+								s = '┴';
+							}
 						}
-						else if(posTop && ['┴','┘'].indexOf(char) > -1)
-							s = ' ';
-						else if(!posLeft && posTop)
-							s = '│';
-						else if(char == '├' && posTop != 0)
-							s = '│';
-						else
-							s = char;
+					}
+					// any other char
+					else {
+						//					if(posLeft == 0 && !obj.hasNext)
+						//						s = '┘';
+						//					else
+						s = '│';
+					}
 
-						if(s)
-							pre.str += this._map(s);
+					if(s){
+						pre.plain += s;
+						pre.str += mapBase._map(s);
+					}
+				}
+
+				// add final prefix (customizable)
+				pre.plain += obj.prefix;
+				pre.str += Log.col(obj.prefix, obj.log.opt.color);
+
+				// create str
+				var str = {
+					str: obj.line
+				};
+
+				// add plain str
+				str.plain = Log.strip(str.str);
+
+				switch(str.plain){
+					case 'undefined':
+						str.str = '';
+						break;
+
+					case '---':
+						str.str = '';
+						var width = Log.getTerminalWidth() - obj.level - 1;
+						for(var iLine = 0; iLine < width; iLine++){
+							str.str += '─';
+						}
+						pre.str = pre.str.substr(0,pre.str.length-6);
+						pre.plain = pre.plain.substr(0,pre.plain.length-1);
+						str.str = Log.col(str.str, obj.color, 'dim'); //+'┤');
+						break;
+				}
+
+				// truncate
+				if((pre.plain.length + str.plain.length) > maxWidth || str.plain.indexOf("\n") > -1){
+					// generate new lines
+					var addLines = Log.wrap(str.str, maxWidth - obj.level-10).split("\n");
+					str.str = '';
+
+					// iterate new lines
+					addLines.forEach(function(line, posTop){
+						var isTopLast = posTop == addLines.length-1;
+
+						line = ' '+Log.col(line, obj.color, 'bold');
+
+						// iterate prefix chars
+						pre.str = '';
+						pre.plain.split('').slice(0, -1).forEach(function(char, posLeft, all){
+							var isLeftLast = posLeft == all.length-1;
+							var s = null;
+
+							if(isLeftLast && posTop == 0){
+								if(char == '└')
+									s = '├';
+								else if(char == '├')
+									s = '├';
+								else{
+									s = '┌';
+								}
+							}
+							else if(isLeftLast && !isTopLast)
+								s = '│';
+							else if(isLeftLast && isTopLast){
+								if(obj.hasNext && (obj.hasNext.level == obj.level+1 || obj.hasNext.level == obj.level))
+									s = '│';
+								else if(obj.level == 0){
+									s = '├';
+								}
+								else
+									s = '└';
+							}
+							else if(posTop && ['┴','┘'].indexOf(char) > -1)
+								s = ' ';
+							else if(!posLeft && posTop)
+								s = '│';
+							else if(char == '├' && posTop != 0)
+								s = '│';
+							else
+								s = char;
+
+							if(s)
+								pre.str += this._map(s);
+						}.bind(this));
+
+						// add truncated
+						body += "\n" + Log.col(pre.str, obj.color) + Log.col(line, obj.colorText);
 					}.bind(this));
-
-					// add truncated
-					body += "\n" + Log.col(pre.str, obj.color) + Log.col(line, obj.colorText);
-				}.bind(this));
-			}
-			else {
-				// add without truncation
-				body += "\n" + pre.str + Log.col(str.str, obj.colorText, 'bold');
-			}
+				}
+				else {
+					// add without truncation
+					body += "\n" + pre.str + Log.col(str.str, obj.colorText, 'bold');
+				}
 
 
-			callbackLine();
-		}.bind(this),
-		// bind callback so the garbage collector doesn't eat it
-		function(){ arguments[0](body); }.bind(this, callback));
+				callbackLine();
+			}.bind(this),
+			// bind callback so the garbage collector doesn't eat it
+			function(){ arguments[0](body); }.bind(this, callback));
 	}.bind(this));
 };
 
@@ -1226,14 +1245,12 @@ Log.prototype.out = function(method){
 			// the output
 			if(str){
 				Log.clearLine();
-//				Log.console.log('--->',[str]);
 				process.stdout.write(str+'\n');
-//				Log.console[method](str+"\n");
 			}
 
 
 			// clear lines
-//			this.lines = [];
+			//			this.lines = [];
 		}.bind(this)
 	);
 
@@ -1440,7 +1457,6 @@ Log.prototype._object = function(obj, data){
 
 		// calc colors
 		var color = data.colors[(box.level-this.level-1) % data.colors.length];
-		var colorNext = data.colors[data.colors.indexOf(color)+1] || data.colors[0];
 		var objStr = '';
 
 		if(objSub instanceof Function){
@@ -1460,8 +1476,8 @@ Log.prototype._object = function(obj, data){
 		if(!title){
 			title = objStr;
 			title =	Log.col(Log.pad('─', data.pad - box.level - (title.length)-3), 'dim')
-						+ title
-						+ Log.col('─┐', 'dim');
+			+ title
+			+ Log.col('─┐', 'dim');
 		}
 
 		// add title
@@ -1480,14 +1496,14 @@ Log.prototype._object = function(obj, data){
 			return functStr.forEach(function(line, i){
 				box.line(
 					// prefix
-						Log.col(i+1,'grey')
+					Log.col(i+1,'grey')
 					+ '─'
-					// code & spacer
+						// code & spacer
 					+ Log.col(
-								Log.truncate(line, data.pad - box.level - 4 - spacer)
-							+ Log.pad(' ', functPad - line.length - box.level - 4 - spacer)
-							,	'code'
-						)
+						Log.truncate(line, data.pad - box.level - 4 - spacer)
+						+ Log.pad(' ', functPad - line.length - box.level - 4 - spacer)
+						,	'code'
+					)
 					, 'pre:─'+Log.pad('─', spacer - ((i+1)+'').length)
 				)
 			});
@@ -1500,12 +1516,12 @@ Log.prototype._object = function(obj, data){
 			var padRight = padLeft < emptyPad/2 ? padLeft+1 : padLeft;
 
 			emptyStr = Log.col(
-					  Log.pad('─', padLeft)
-					+ Log.col(emptyStr, 'bold')
-					+ Log.pad('─', padRight)
-					+ (box.level-this.level>1?'┤':'─')
-					+ Log.col(box.level-this.level>1?'│':'┤', data.colors[0])
-					, 'dim');
+				Log.pad('─', padLeft)
+				+ Log.col(emptyStr, 'bold')
+				+ Log.pad('─', padRight)
+				+ (box.level-this.level>1?'┤':'─')
+				+ Log.col(box.level-this.level>1?'│':'┤', data.colors[0])
+				, 'dim');
 			box.line(emptyStr, 'pre:');
 		}
 
@@ -1521,13 +1537,13 @@ Log.prototype._object = function(obj, data){
 				// title "key────[object Object]─┤"
 				var title = Array.isArray(val) ? '[object Array]' : val.toString();
 				title = Log.col(key)
-					+ Log.col(
-							Log.pad('─',
-								data.pad - (box.level) - colors.stripColor(key).length - colors.stripColor(title).length -5)
+				+ Log.col(
+					Log.pad('─',
+						data.pad - (box.level) - colors.stripColor(key).length - colors.stripColor(title).length -5)
 					, 'dim')
-					+	title
-					+ Log.col('─┬', 'dim')
-					+ Log.col('┤', data.colors[0], 'dim');
+				+	title
+				+ Log.col('─┬', 'dim')
+				+ Log.col('┤', data.colors[0], 'dim');
 
 				return insert.call(this, val, box, title, path);
 			}
@@ -1539,7 +1555,7 @@ Log.prototype._object = function(obj, data){
 			var valueLines = [val];
 			var line = {
 				prefix:	[
-						key
+					key
 					+ Log.col(Log.pad('·', data.padKey-key.length-box.level)+': ', 'dim')
 					, Log.pad(' ', data.padKey-box.level+2)
 				]
@@ -1562,8 +1578,8 @@ Log.prototype._object = function(obj, data){
 
 				// build "title···: value │"
 				box.line(
-						// prefix
-						line.prefix[i<1?0:1]
+					// prefix
+					line.prefix[i<1?0:1]
 						// value
 					+	Log.col(Log.truncate(val, data.padVal-6), 'grey')
 						// spacer
@@ -1596,11 +1612,11 @@ Log.prototype._object = function(obj, data){
 
 		box.line(Log.col(
 			Log.pad('─', (data.pad - (box.level) - footerStr.length -3))
-		+ footerStr
-		+ (box.parent && box.parent.level == this.level
-			? Log.col('─┘', 'dim')
-			: Log.col('┴', 'dim') + Log.col('┤', data.colors[0], 'dim')
-		), 'dim'), 'pre:');
+			+ footerStr
+			+ (box.parent && box.parent.level == this.level
+				? Log.col('─┘', 'dim')
+				: Log.col('┴', 'dim') + Log.col('┤', data.colors[0], 'dim')
+			), 'dim'), 'pre:');
 	}
 
 	// run calculations for layout structure
@@ -1635,7 +1651,11 @@ module.exports = function(opt){
 	// config
 	log.options(opt);
 
-	if(!log.opt.disableWelcome)
+	if(log.opt.isWorker){
+		log.opt.disableWelcome = true;
+		log.printedLines = 1;
+	}
+	else if(!log.opt.disableWelcome)
 		log.log(log.col(pkg.name, 'rainbow')+' v'+pkg.version+' - Hi mate');
 
 	if(log.opt.override)
