@@ -647,6 +647,18 @@ Log.prototype.info = function(){
 };
 
 /**
+ * ok - Shortcut to indicate sth went alright
+ *
+ * @returns {Log}
+ */
+Log.prototype.ok = function(){
+	// log
+	this.info.apply(this, ['OK', 'green']);
+
+	return this;
+};
+
+/**
  * dir - Alias for this.log
  *
  * @returns {Log}
