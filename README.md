@@ -304,6 +304,7 @@ Alias exist to cover features of the native `console` or to provide shortcuts fo
 | console **.error**   | ⇔ | console **.log** (red)    |
 | console **.dir**     | ⇔ | console **.log**          |
 | console **.timeEnd** | ⇔ | console **.time**          |
+| console **.ok** | ⇔ | console **.info('OK')**          |
 
 ## Separate mode
 
