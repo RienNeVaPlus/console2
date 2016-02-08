@@ -653,7 +653,7 @@ Log.prototype.info = function(){
  */
 Log.prototype.ok = function(){
 	// log
-	this.info.apply(this, ['OK', 'green']);
+	this.info.apply(this, 'OK');
 
 	return this;
 };
