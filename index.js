@@ -653,7 +653,7 @@ Log.prototype.info = function(){
  */
 Log.prototype.ok = function(){
 	// log
-	this.info.apply(this, ['OK']);
+	this.time('_').out();
 
 	return this;
 };
@@ -738,7 +738,7 @@ Log.prototype.time = function(label, reset){
 	var lastExec = this.timer._calls[label||'_'];
 
 	// build line
-	var line = Log.col(label||'Time','green')+Log.col(': ', 'grey')
+	var line = Log.col(label=='_'?'OK':label||'Time','green')+Log.col(': ', 'grey')
 		+ Log.col(passed.toFixed(0)+'ms', 'white')
 		+ (reset ? Log.col(' - ', 'grey') + Log.col('reset', 'yellow'):'');
 
@@ -771,7 +771,7 @@ Log.prototype.time = function(label, reset){
 	// save call time
 	this.timer._calls[label||'_'] = now;
 
-	if(passed > 1000){
+	if(passed > 10000){
 		var delta = passed / 1000;
 		var res = [];
 
