@@ -739,7 +739,7 @@ Log.prototype.time = function(label, reset){
 
 	// build line
 	var line = Log.col(label=='_'?'OK':label||'Time','green')+Log.col(': ', 'grey')
-		+ Log.col(passed.toFixed(0)+'ms', 'white')
+		+ Log.col(passed.toFixed(0)+'ms', label=='_'?'grey':'white')
 		+ (reset ? Log.col(' - ', 'grey') + Log.col('reset', 'yellow'):'');
 
 	// add "+Xms"
