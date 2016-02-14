@@ -108,7 +108,7 @@ console.log('You look gorgeous!');
 
 #### *"Houston we have a problem."*
 
-As you see, you need to wait until you are done adding new lines before you can print a box. The solution is simple: ~~You~~ **We queue stuff**.
+As you see, you need to wait until you are done adding new lines before you can print a box. The solution is simple: **We queue stuff**.
 Instead of `console.log`, use `console.line`. It does the same thing, except for calling `stdout` (it's not printing the line).
 
 ```js
@@ -304,7 +304,7 @@ Alias exist to cover features of the native `console` or to provide shortcuts fo
 | console **.error**   | ⇔ | console **.log** (red)    |
 | console **.dir**     | ⇔ | console **.log**          |
 | console **.timeEnd** | ⇔ | console **.time**          |
-| console **.ok** | ⇔ | console **.info('OK')**          |
+| console **.ok** | ⇔ | console **.time('OK').out()**          |
 
 ## Separate mode
 
