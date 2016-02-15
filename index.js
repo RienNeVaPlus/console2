@@ -794,7 +794,7 @@ Log.prototype.time = function(label, reset){
 				res.push(Log.plural(r, '%s '+key));
 		});
 
-		this.box(Log.col(res.join(' + '), 'grey'));
+		this.box(Log.col(res.join(' + '), 'grey')).over();
 	}
 
 	// output?
