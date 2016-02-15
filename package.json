@@ -1,6 +1,6 @@
 {
   "name": "console2",
-  "version": "2.2.5",
+  "version": "2.2.6",
   "description": "Improved console: object inspection, stack traces, tables with ASCII box-drawing characters and colors.",
   "main": "index.js",
   "scripts": {
