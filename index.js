@@ -738,7 +738,7 @@ Log.prototype.time = function(label, reset){
 	var lastExec = this.timer._calls[label||'_'];
 
 	// build line
-	var line = Log.col(label=='_'?'OK':label||'Time','green')+Log.col(': ', 'grey')
+	var line = Log.col(label=='_'?'OK':label||'Time',passed<=10?'green':(passed<=100?'yellow':'red'))+Log.col(': ', 'grey')
 		+ Log.col(passed.toFixed(0)+'ms', label=='_'?'grey':'white')
 		+ (reset ? Log.col(' - ', 'grey') + Log.col('reset', 'yellow'):'');
 
