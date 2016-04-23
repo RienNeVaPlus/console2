@@ -52,7 +52,7 @@ module.exports = (function(){
 		options: ['Set option/s', col('object', 'white')],
 		out: ['Print current stack', lineArgs],
 		over: ['Mark box printable for out()', lineArgs],
-		pad: ['Pad a string', col('string', 'white')+', '+console.col('length', 'white')],
+		pad: ['Pad a string', col('string', 'white')+', '+col('length', 'white')+', ['+col('string', 'white')+']'],
 		spacer: 'Add empty line',
 		strip: ['Remove colors from a string', col('string', 'white')],
 		time: ['Display timer', '['+col('timerName', 'white')+'], ['+col('reset', 'white')+']'],

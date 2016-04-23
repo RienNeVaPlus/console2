@@ -290,7 +290,8 @@ Utility to generate a pad string when working with aligned texts.
 
 ```js
 console.pad('-', 5)           // = '-----'
-console.pad('.', 'Hello', 7)  // = 'Hello..'
+console.pad('.', 7, 'Hello')  // = 'Hello..'
+console.pad(' ', 7, 'Hello', true)  // = '  Hello'
 ```
 
 ## Aliases

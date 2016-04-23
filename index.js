@@ -243,26 +243,34 @@ Log.capitalize = function(str){
 /**
  * Pad a str
  *
- * Use in two ways:
- * .pad('-', 5)           = '-----'
- * .pad('.', 'Hello', 7)  = 'Hello..'
+ * Use in three ways:
+ * .pad('-', 5)                 = '-----'
+ * .pad('.', 7, 'Hello')        = 'Hello..'
+ * .pad(' ', 7, 'Hello', true)  = '  Hello'
  *
  * @param {String} padSymbol
- * @param {Number|String} length
- * @param {Number} [max]
+ * @param {Number} length
+ * @param {String} [str]
+ * @param {Boolean} [useLeftSide]
  * @returns {String}
  */
-Log.pad = function(padSymbol, length, max){
+Log.pad = function(padSymbol, length, str, useLeftSide){
 	var out = '';
 
-	if(typeof length == 'string'){
-		while(length.length < max){
-			length += padSymbol;
+	if(str){
+		while(str.length < length){
+			if(useLeftSide)
+				str = padSymbol + str;
+			else
+				str += padSymbol;
 		}
-		return length;
+		return str;
 	}
 	for(var i = 0; i < length; i += padSymbol.length){
-		out += padSymbol;
+		if(useLeftSide)
+			out = padSymbol + out;
+		else
+			out += padSymbol;
 	}
 
 	return out;
