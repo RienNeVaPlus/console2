@@ -284,7 +284,7 @@ Removes any ansi codes from the `input` string ([see module **chalk**](https://g
 
 ***
 
-#### ``console.pad({String} padSymbol, {Number|String} length, {Number} [max])``
+#### ``console.pad({String} padSymbol, {Number} length, {Number} [str], {Boolean} [useLeftSide])``
 
 Utility to generate a pad string when working with aligned texts.
 
