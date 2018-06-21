@@ -40,7 +40,8 @@ module.exports = (function(){
 	var docs = {
 		beep: ['Beep noise, outputs "BEEP"', '['+console.col('title', 'white')+']'],
 		box: ['Create a sub box', lineArgs],
-		col: ['Colorize a string', col('input', 'white')+', {...'+col('color', 'white')+'}'],
+		build: 'Returns current stack as Promise(string)',
+		col: ['Colorize a string', col('input', 'white')+', {…'+col('color', 'white')+'}'],
 		dir: '~log',
 		error: ['Displays text in '+col('red','red'), lineArgs],
 		flush: '~out',
@@ -64,21 +65,23 @@ module.exports = (function(){
 
 	// insert docs
 	Object.keys(console).sort().forEach(function(key){
-		if(key.substr(0,1)=='_'
+		if(key.substr(0,1) === '_'
 			|| ['Console','assert','overrideConsole'].indexOf(key) > -1
-			|| typeof console[key] != 'function') return;
+			|| typeof console[key] !== 'function') return;
 		var doc = docs[key];
 		var line = col(key, 'cyan')
 			+ '('+(Array.isArray(doc) ? doc[1] : '')+')';
 
+		if(!doc) return;
+
 		// alias
-		if(typeof doc == 'string' && doc.substr(0,1) == '~')
+		if(typeof doc === 'string' && doc.substr(0,1) === '~')
 			doc = 'Alias for '+doc.substr(1);
 
 		// add desc
 		line += console.pad(' ', 35 - console.strip(line).length)
 		+ ' - '
-		+ (Array.isArray(doc) ? doc[0] : doc);
+		+ (Array.isArray(doc) ? doc[0] : doc||'');
 
 		ref._(line);
 	});
