@@ -1287,11 +1287,7 @@ Log.prototype.build = function(){
 		this.opt.over = true;
 
 		// use parent out when available
-		if(this.parent){
-			return this.parent._buildString(res, true);
-		}
-
-		this._buildString(res, true);
+		(this.parent || this)._buildString(function(str){ res(str.substr(1)) }, true);
 	}.bind(this));
 };
 
