@@ -232,7 +232,6 @@ console.time('TimerTony');
 // (2nd call) outputs 'TimerTony: Xms - reset', resets the timer
 console.time('TimerTony', true);
 ```
-
 ***
 
 #### ``console.trace({String} [label])``

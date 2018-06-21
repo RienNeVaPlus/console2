@@ -1285,7 +1285,7 @@ Log.prototype.build = function(){
 	return new Promise(function(res, rej){
 		this._buildString(res);
 	}.bind(this));
-}
+};
 
 /**
  * Return a specific parent for _buildString structure
