@@ -1283,7 +1283,15 @@ Log.prototype.out = function(method){
  */
 Log.prototype.build = function(){
 	return new Promise(function(res, rej){
-		this._buildString(res);
+		// mark as ready to print
+		this.opt.over = true;
+
+		// use parent out when available
+		if(this.parent){
+			return this.parent._buildString(res, true);
+		}
+
+		this._buildString(res, true);
 	}.bind(this));
 };
 
