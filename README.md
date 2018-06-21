@@ -213,7 +213,7 @@ Makes your terminal beep, outputs `beep: label`.
 ***
 
 #### ``console.time({String} [label], {Boolean} [reset])``
-Very useful stopwatch that shows the elapsed time in a readable format (ms + years, months, days...).
+Useful stopwatch that shows the elapsed time in a readable format (ms + years, months, days...).
 **When called twice, the time in between the two calls is also measured & displayed!**
 
 ```javascript
@@ -237,6 +237,11 @@ console.time('TimerTony', true);
 
 #### ``console.trace({String} [label])``
 Beautified `console.trace`.
+
+***
+
+#### ``console.build()``
+Returns a promise with the output of `console.out()` as a string.
 
 ***
 

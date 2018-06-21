@@ -1278,6 +1278,16 @@ Log.prototype.out = function(method){
 };
 
 /**
+ * Return buffer as string
+ * @returns {Promise<any>}
+ */
+Log.prototype.build = function(){
+	return new Promise(function(res, rej){
+		this._buildString(res);
+	}.bind(this));
+}
+
+/**
  * Return a specific parent for _buildString structure
  *
  * @param [generations=1]
