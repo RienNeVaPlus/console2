@@ -239,7 +239,7 @@ Beautified `console.trace`.
 
 ***
 
-#### ``console.build()``
+#### ``console.build(stripLevels=0, useParent=false)``
 Returns a promise with the output of `console.out()` as a string.
 
 ***

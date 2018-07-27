@@ -1281,13 +1281,20 @@ Log.prototype.out = function(method){
  * Return buffer as string
  * @returns {Promise<any>}
  */
-Log.prototype.build = function(){
+Log.prototype.build = function(stripLevels, useParent){
 	return new Promise(function(res, rej){
 		// mark as ready to print
 		this.opt.over = true;
 
 		// use parent out when available
-		(this.parent || this)._buildString(function(str){ res(str.substr(1)) }, true);
+		var str = (useParent ? (this.parent || this) : this)._buildString(function(str){
+			str = str.substr(1);
+			if(stripLevels > 0){
+				str = Log.strip(str);
+				str = str.replace(new RegExp('^.{'+stripLevels+'}(.+\n?)$', 'gm'), '$1');
+			}
+			return res(str);
+		}, true);
 	}.bind(this));
 };
 
