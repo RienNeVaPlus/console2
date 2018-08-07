@@ -1074,7 +1074,9 @@ Log.prototype._buildString = function(callback, preserveLines){
 					else if(obj.boxNr == 0 && posLeft == obj.level-1){
 						if(!obj.hasPrev)
 							s = '├';//┌
-						else if(!obj.hasNext || obj.hasNext.log.level < obj.level)
+						else if(!obj.hasNext)
+							s = '┴';
+						else if(obj.hasNext && obj.hasNext.log.level < obj.level-1)
 							s = '┴';
 						else {
 							s = '├';
