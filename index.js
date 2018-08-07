@@ -483,9 +483,9 @@ Log.prototype.options = function(opt){
  * @returns {Log}
  */
 Log.prototype.box = function(line, opt){
-	if(arguments.length == 1){
+	if(arguments.length === 1){
 		// line could be either an option or a line
-		if(typeof line == 'string'){
+		if(typeof line === 'string'){
 			// check if line is color
 			if(Log.chalkColors.indexOf(line) > -1 || Log.chalkCommands.indexOf(line) > -1){
 				opt = {color:line};
@@ -1074,9 +1074,7 @@ Log.prototype._buildString = function(callback, preserveLines){
 					else if(obj.boxNr == 0 && posLeft == obj.level-1){
 						if(!obj.hasPrev)
 							s = '├';//┌
-						else if(!obj.hasNext)
-							s = '┴';
-						else if(obj.hasNext && obj.hasNext.log.level < obj.level-1)
+						else if(!obj.hasNext || obj.hasNext && obj.hasNext.log.level < obj.level-1)
 							s = '┴';
 						else {
 							s = '├';
