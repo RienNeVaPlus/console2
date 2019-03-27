@@ -18,7 +18,6 @@
 - Various formatting shortcuts
 - Clean and focused
 - Intelligent use of colors to make contents even more distinguishable
-- Actively maintained
 
 ## Install
 
