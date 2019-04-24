@@ -1206,7 +1206,6 @@ Log.prototype._buildString = function(callback, preserveLines){
 					body += "\n" + pre.str + Log.col(str.str, obj.colorText, 'bold');
 				}
 
-
 				callbackLine();
 			}.bind(this),
 			// bind callback so the garbage collector doesn't eat it
@@ -1377,7 +1376,7 @@ Log.prototype._try = function(funct, arg){
  * @private
  */
 Log.prototype._instanceof = function(instance){
-	return instance instanceof Log || instance instanceof Log.console.Console;
+	return instance ? instance instanceof Log || instance instanceof Log.console.Console : false;
 };
 
 /**
