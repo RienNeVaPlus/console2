@@ -685,8 +685,10 @@ Log.prototype.error = function(){
 	args.push('red');
 
 	// log
-	this.line.apply(this, args);
-	this.out('error');
+	if(this.line){
+		this.line.apply(this, args);
+		this.out('error');
+	}
 
 	return this;
 };
