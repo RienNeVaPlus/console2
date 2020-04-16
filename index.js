@@ -644,6 +644,9 @@ Log.prototype.log = function(){
 Log.prototype.info = function(){
 	var args = Array.prototype.slice.call(arguments);
 
+	// fix weird calls
+	if(!(this instanceof Log)) return console.opt.console.log.apply(console.opt.console, args);
+
 	// add red
 	args.push('green');
 
@@ -681,6 +684,9 @@ Log.prototype.dir = Log.prototype.log;
 Log.prototype.error = function(){
 	var args = Array.prototype.slice.call(arguments);
 
+	// fix weird calls
+	if(!(this instanceof Log)) return console.opt.console.log.apply(console.opt.console, args);
+
 	// add red
 	args.push('red');
 
@@ -700,6 +706,9 @@ Log.prototype.error = function(){
  */
 Log.prototype.warn = function(){
 	var args = Array.prototype.slice.call(arguments);
+
+	// fix weird calls
+	if(!(this instanceof Log)) return console.opt.console.log.apply(console.opt.console, args);
 
 	// add yellow
 	args.push('yellow');
@@ -887,6 +896,9 @@ Log.prototype.trace = function(message){
 Log.prototype.title = function(line){
 	var args = Array.prototype.slice.call(arguments);
 	var maxWidth = Log.getTerminalWidth();
+
+	// fix weird calls
+	if(!(this instanceof Log)) return console.opt.console.log.apply(console.opt.console, args);
 
 	// top border
 	this.line(Log.col(Log.pad('─', maxWidth - this.level - 2)+'┐', this.opt.color, 'dim'), 'pre:');
