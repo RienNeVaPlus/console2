@@ -32,5 +32,6 @@
     "async": "^1.4.2",
     "chalk": "^1.1.1",
     "linewrap": "^0.2.1"
-  }
+  },
+  "types": "types.d.ts"
 }
