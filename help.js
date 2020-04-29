@@ -23,7 +23,7 @@ module.exports = (function(){
 	// install
 	console
 		._('Installation', 'white')
-		.title('npm install --save console2')
+		.line('npm install --save console2')
 		.spacer();
 
 	// reference
@@ -104,7 +104,7 @@ module.exports = (function(){
 	};
 
 	// example
-	console.spacer().title('Example 1: Box tree', 'bold');
+	console.spacer().title('\nExample 1: Box tree', 'bold');
 	console.line(example1).line();
 
 	example1();
@@ -117,7 +117,7 @@ module.exports = (function(){
 	};
 
 	// example
-	console.spacer().title('Example 2: Object inspection', 'bold');
+	console.spacer().title('\nExample 2: Object inspection', 'bold');
 	console.line(example2).line();
 
 	example2();
@@ -132,7 +132,7 @@ module.exports = (function(){
 	};
 
 	// example
-	console.spacer().title('Example 3: Stopwatch', 'bold');
+	console.spacer().title('\nExample 3: Stopwatch', 'bold');
 	console.line(example3).line();
 
 	example3();
@@ -145,7 +145,7 @@ module.exports = (function(){
 	};
 
 	// example
-	console.spacer().title('Example 4: Stack trace', 'bold');
+	console.spacer().title('\nExample 4: Stack trace', 'bold');
 	console.line(example4).line();
 
 	example4();
