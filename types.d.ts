@@ -1,15 +1,15 @@
 export = Console2.main;
 
 declare namespace Console2 {
-	type ConsoleOpt = ConsoleOptions | string | number;
-	type ConsoleColor = 'cyan' | 'green' | 'yellow' | 'red' | 'magenta' | 'blue' | 'white' | 'grey'
-		| 'black' | 'rainbow' | 'zebra' | 'code';
+	type Opt = Options | string | number
+	type Color = 'cyan' | 'green' | 'yellow' | 'red' | 'magenta' | 'blue' | 'white' | 'grey' | 'black' | 'rainbow' | 'zebra' | 'code'
+	type Background = 'bgCyan' | 'bgGreen' | 'bgYellow' | 'bgRed' | 'bgMagenta' | 'bgBlue' | 'bgWhite' | 'bgGrey' | 'bgBlack'
 
-	interface ConsoleOptions {
+	interface Options {
 		disableWelcome?: boolean
 		console?: any;
 		border?: number;
-		color?: ConsoleColor;
+		color?: Color;
 		colorText?: string;
 		isWorker?: boolean;
 		map?: [string, string][];
@@ -20,11 +20,11 @@ declare namespace Console2 {
 	}
 
 	interface console {
-		opt: ConsoleOptions;
-		col: (str: string, color: ConsoleColor) => string;
+		opt: Options;
+		col: (str: string | number, color: Color | Background) => string;
 		pad: (padSymbol: string, length: number, string?: string, useLeftSide?: boolean) => string;
 		overrideConsole: () => this;
-		options: (opt: ConsoleOpt) => this;
+		options: (opt: Opt) => this;
 		box: (...lines: any[]) => this;
 		help: () => void;
 		line: (...lines: any[]) => this;
@@ -43,10 +43,10 @@ declare namespace Console2 {
 		spacer: () => this;
 		beep: (label?: string) => this;
 		over: () => this;
-		out: (method?: string, ...lines: any[]) => this;
+		out: (...lines: any[]) => this;
 		build: (stripLevels: boolean, useParent: boolean) => Promise<string>;
 		getParent: (generations: number) => this;
 	}
 
-	function main(opt?: ConsoleOptions): console;
+	function main(opt?: Options): console;
 }
