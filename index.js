@@ -644,9 +644,6 @@ Log.prototype.log = function(){
 Log.prototype.info = function(){
 	var args = Array.prototype.slice.call(arguments);
 
-	// fix weird calls
-	if(!(this instanceof Log)) return console.opt.console.log.apply(console.opt.console, args);
-
 	// add red
 	args.push('green');
 
@@ -684,9 +681,6 @@ Log.prototype.dir = Log.prototype.log;
 Log.prototype.error = function(){
 	var args = Array.prototype.slice.call(arguments);
 
-	// fix weird calls
-	if(!(this instanceof Log)) return console.opt.console.log.apply(console.opt.console, args);
-
 	// add red
 	args.push('red');
 
@@ -706,9 +700,6 @@ Log.prototype.error = function(){
  */
 Log.prototype.warn = function(){
 	var args = Array.prototype.slice.call(arguments);
-
-	// fix weird calls
-	if(!(this instanceof Log)) return console.opt.console.log.apply(console.opt.console, args);
 
 	// add yellow
 	args.push('yellow');
@@ -897,9 +888,6 @@ Log.prototype.title = function(line){
 	var args = Array.prototype.slice.call(arguments);
 	var maxWidth = Log.getTerminalWidth();
 
-	// fix weird calls
-	if(!(this instanceof Log)) return console.opt.console.log.apply(console.opt.console, args);
-
 	// top border
 	this.line(Log.col(Log.pad('─', maxWidth - this.level - 2)+'┐', this.opt.color, 'dim'), 'pre:');
 
@@ -1041,7 +1029,7 @@ Log.prototype._buildString = function(callback, preserveLines){
 
 					// 1st from right
 					if(posLeft == obj.level){
-						if(this.printedLines === 1)
+						if(this.printedLines === 1 && obj.level === 0)
 							s = '┌';
 						else if(obj.hasNext && obj.level == 0){
 							if(Log.strip(obj.line) == 'undefined')
@@ -1300,7 +1288,7 @@ Log.prototype.build = function(stripLevels, useParent){
 		this.opt.over = true;
 
 		// use parent out when available
-		var str = (useParent ? (this.parent || this) : this)._buildString(function(str){
+		(useParent ? (this.parent || this) : this)._buildString(function(str){
 			str = str.substr(1);
 			if(stripLevels > 0){
 				str = Log.strip(str);
