@@ -28,15 +28,15 @@ function Log(parent, opt){
 	this.pad = Log.pad;
 
 	// set color to colorText by default
-	if(typeof opt == 'object' && opt.color && !opt.colorText)
+	if(typeof opt === 'object' && opt.color && !opt.colorText)
 		opt.colorText = opt.color;
 
 	// default options
 	this.opt = Log.extend({
 		console:    null,                                   // object to receive the output of console2
-		border:     typeof opt == 'number' ? opt : 1,       // vertical border width (1 or 2)
-		color:      typeof opt == 'string' ? opt : 'grey',  // border color
-		colorText:  typeof opt == 'string' ? opt : 'grey',  // text color
+		border:     typeof opt === 'number' ? opt : 1,       // vertical border width (1 or 2)
+		color:      typeof opt === 'string' ? opt : 'grey',  // border color
+		colorText:  typeof opt === 'string' ? opt : 'grey',  // text color
 		isWorker:   false,                                  // run as a worker
 		map:        [['...','…']],                         // auto replace
 		enableAutoOut: false,                               // enable auto out calls (used when in node console)
@@ -1016,8 +1016,8 @@ Log.prototype._buildString = function(callback, preserveLines){
 				obj.levelNext = lines[i+1] ? lines[i+1].level : null;
 				obj.hasPrev = lines[i-1] || false;
 				obj.hasNext = lines[i+1] || false;
-				obj.hasBoxPrev = obj.hasPrev && obj.hasPrev.id == obj.id;
-				obj.hasBoxNext = obj.hasNext && obj.hasNext.id == obj.id;
+				obj.hasBoxPrev = obj.hasPrev && obj.hasPrev.id === obj.id;
+				obj.hasBoxNext = obj.hasNext && obj.hasNext.id === obj.id;
 
 				// iterate level times (|)
 				for(var posLeft = 0; posLeft <= obj.level; posLeft++){
@@ -1028,22 +1028,22 @@ Log.prototype._buildString = function(callback, preserveLines){
 					mapBase = obj.log.getParent(obj.level-posLeft);
 
 					// 1st from right
-					if(posLeft == obj.level){
+					if(posLeft === obj.level){
 						if(this.printedLines === 1 && obj.level === 0)
 							s = '┌';
-						else if(obj.hasNext && obj.level == 0){
-							if(Log.strip(obj.line) == 'undefined')
+						else if(obj.hasNext && obj.level === 0){
+							if(Log.strip(obj.line) === 'undefined')
 								s = '│';
 							else
 								s = '├';//┌
 						}
-						else if(obj.boxNr == 0){
+						else if(obj.boxNr === 0){
 							if(obj.hasBoxNext || obj.levelNext > obj.level)
 								s = '┬';//┬
 							else if(obj.hasBoxPrev)
 								s = '└';//└
-							else if(obj.level == 0){
-								if(obj.line.substr(0,2) == '  ')
+							else if(obj.level === 0){
+								if(obj.line.substr(0,2) === '  ')
 									s = '│';
 								else
 									s = '├';
@@ -1051,31 +1051,31 @@ Log.prototype._buildString = function(callback, preserveLines){
 							else
 								s = '─';//─
 						}
-						else if(obj.hasNext && obj.levelNext >= obj.level && Log.strip(obj.line) == 'undefined')
+						else if(obj.hasNext && obj.levelNext >= obj.level && Log.strip(obj.line) === 'undefined')
 							s = '│';
 						else if(
 							obj.hasNext
 							&& (
-							obj.hasNext.log.id == obj.log.id
+							obj.hasNext.log.id === obj.log.id
 							|| (
 							obj.hasNext.log
 							&& obj.hasNext.log.parent
-							&& obj.hasNext.log.parent.id == obj.log.id
+							&& obj.hasNext.log.parent.id === obj.log.id
 							)
 							)
 						)
 							s = '├';
 						else if(['═','╛'].indexOf(obj.prefix.substr(0,1)) > -1)
 							s = '╘';
-						else if(obj.level == 0)
+						else if(obj.level === 0)
 							s = '├';
 						else
 							s = '└';
 					}
 					// 2nd from right when first of box
-					else if(obj.boxNr == 0 && posLeft == obj.level-1){
+					else if(obj.boxNr === 0 && posLeft === obj.level-1){
 						if(!obj.hasPrev)
-							s = '├';//┌
+							s = '┬';//┌├
 						else if(!obj.hasNext || obj.hasNext && obj.hasNext.log.level < obj.level-1)
 							s = '┴';
 						else {
@@ -1083,22 +1083,23 @@ Log.prototype._buildString = function(callback, preserveLines){
 						}
 					}
 					// 2nd from right when no next (is closing)
-					else if(!obj.hasBoxNext && obj.levelNext < obj.level-1 && posLeft == obj.level-1)
+					else if(!obj.hasBoxNext && obj.levelNext < obj.level-1 && posLeft === obj.level-1)
 						s = '┘';//┘
 					else if(!obj.hasBoxNext && obj.levelNext < obj.level-1){
-						if(!obj.hasNext)
-							if(posLeft == 0)
+						if(!obj.hasNext){
+							if(posLeft === 0)
 								s = '├';//└
 							else if(posLeft < obj.level)
 								s = '┴';
 							else
 								s = '└';
+						}
 						else {
-							if(posLeft == obj.levelNext)
+							if(posLeft === obj.levelNext)
 								s = '├';
 							else if(posLeft < obj.levelNext)
 								s = '│';
-							else if(posLeft == 0 || posLeft == obj.levelNext)
+							else if(posLeft === 0 || posLeft === obj.levelNext)
 								s = '├';
 							else{
 								s = '┴';
@@ -1107,10 +1108,13 @@ Log.prototype._buildString = function(callback, preserveLines){
 					}
 					// any other char
 					else {
-						//					if(posLeft == 0 && !obj.hasNext)
+						//					if(posLeft === 0 && !obj.hasNext)
 						//						s = '┘';
 						//					else
-						s = '│';
+						if(posLeft === 0 && !obj.hasPrev)
+							s = '├'
+						else
+							s = '│';
 					}
 
 					if(s){
@@ -1156,20 +1160,20 @@ Log.prototype._buildString = function(callback, preserveLines){
 
 					// iterate new lines
 					addLines.forEach(function(line, posTop){
-						var isTopLast = posTop == addLines.length-1;
+						var isTopLast = posTop === addLines.length-1;
 
 						line = ' '+Log.col(line, obj.color, 'bold');
 
 						// iterate prefix chars
 						pre.str = '';
 						pre.plain.split('').slice(0, -1).forEach(function(char, posLeft, all){
-							var isLeftLast = posLeft == all.length-1;
+							var isLeftLast = posLeft === all.length-1;
 							var s = null;
 
-							if(isLeftLast && posTop == 0){
-								if(char == '└')
+							if(isLeftLast && posTop === 0){
+								if(char === '└')
 									s = '├';
-								else if(char == '├')
+								else if(char === '├')
 									s = '├';
 								else{
 									s = '┌';
@@ -1178,9 +1182,9 @@ Log.prototype._buildString = function(callback, preserveLines){
 							else if(isLeftLast && !isTopLast)
 								s = '│';
 							else if(isLeftLast && isTopLast){
-								if(obj.hasNext && (obj.hasNext.level == obj.level+1 || obj.hasNext.level == obj.level))
+								if(obj.hasNext && (obj.hasNext.level === obj.level+1 || obj.hasNext.level === obj.level))
 									s = '│';
-								else if(obj.level == 0){
+								else if(obj.level === 0){
 									s = '├';
 								}
 								else
@@ -1190,7 +1194,7 @@ Log.prototype._buildString = function(callback, preserveLines){
 								s = ' ';
 							else if(!posLeft && posTop)
 								s = '│';
-							else if(char == '├' && posTop != 0)
+							else if(char === '├' && posTop !== 0)
 								s = '│';
 							else
 								s = char;
@@ -1459,7 +1463,7 @@ Log.prototype._object = function(obj, data){
 		}
 
 		// handle object
-		if(objSub && typeof objSub == 'object'){
+		if(objSub && typeof objSub === 'object'){
 			// add obj.toString name (40/60 to key & val)
 			data.padKey = Math.max(data.padKey, Math.round(objSub.toString().length *.4)+2);
 			data.padVal = Math.max(data.padVal, Math.round(objSub.toString().length *.6)+2);
@@ -1572,9 +1576,9 @@ Log.prototype._object = function(obj, data){
 			var val = objSub[key];
 
 			// sub object
-			if(val && typeof val == 'object'){
+			if(val && typeof val === 'object'){
 				// build path
-				path[box.level+1] = (parseInt(key) == key+'' ? '['+key+']' : '.'+key);
+				path[box.level+1] = (parseInt(key) === key+'' ? '['+key+']' : '.'+key);
 
 				// title "key────[object Object]─┤"
 				var title = Array.isArray(val) ? '[object Array]' : val.toString();
@@ -1608,7 +1612,7 @@ Log.prototype._object = function(obj, data){
 				valueLines = val.toString().replace(/\t/g, '  ').replace(/\r/g, '').split("\n");
 			}
 			// break value into multiple lines
-			else if(typeof val == 'string'){
+			else if(typeof val === 'string'){
 				valueLines = Log.wrap(val, data.padVal-9).replace(/\r/g, '').split("\n");
 			}
 
@@ -1631,9 +1635,9 @@ Log.prototype._object = function(obj, data){
 						// is min 2nd lvl
 						(box.level - this.level	> 1
 							// is last of any > lvl1
-							? (i == valueLines.length-1 && keys[iKeys+1] && typeof objSub[keys[iKeys+1]] == 'object'
+							? (i === valueLines.length-1 && keys[iKeys+1] && typeof objSub[keys[iKeys+1]] === 'object'
 							? '↓'
-							: (i == 0 && keys[iKeys-1] && typeof objSub[keys[iKeys-1]] == 'object'
+							: (i === 0 && keys[iKeys-1] && typeof objSub[keys[iKeys-1]] === 'object'
 							? '↑'
 							: '│')
 						)
@@ -1641,7 +1645,7 @@ Log.prototype._object = function(obj, data){
 						), color, 'dim'
 					)
 					+ Log.col('│', data.colors[0], 'dim')
-					, 'pre:'+(line.lines && line.lines == i?'┘':(line.lines && i<1?'┐':(line.lines?'┤':'─')))
+					, 'pre:'+(line.lines && line.lines === i?'┘':(line.lines && i<1?'┐':(line.lines?'┤':'─')))
 				);
 			}.bind(this));
 		}.bind(this));
@@ -1655,7 +1659,7 @@ Log.prototype._object = function(obj, data){
 		box.line(Log.col(
 			Log.pad('─', (data.pad - (box.level) - footerStr.length -3))
 			+ footerStr
-			+ (box.parent && box.parent.level == this.level
+			+ (box.parent && box.parent.level === this.level
 				? Log.col('─┘', 'dim')
 				: Log.col('┴', 'dim') + Log.col('┤', data.colors[0], 'dim')
 			), 'dim'), 'pre:');
