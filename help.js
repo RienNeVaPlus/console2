@@ -1,7 +1,7 @@
 var pkg = require('./package');
 require('./')();
 
-module.exports = (function(){
+(function(){
 	// shortcut
 	var col = console.col;
 
@@ -23,7 +23,7 @@ module.exports = (function(){
 	// install
 	console
 		._('Installation', 'white')
-		.line('npm install --save console2')
+		.title('npm install --save console2')
 		.spacer();
 
 	// reference
@@ -104,7 +104,7 @@ module.exports = (function(){
 	};
 
 	// example
-	console.spacer().title('Example 1: Box tree');
+	console.spacer().title('Example 1: Box tree', 'bold');
 	console.line(example1).line();
 
 	example1();
