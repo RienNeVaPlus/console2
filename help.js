@@ -1,5 +1,5 @@
-var pkg = require('./package');
-require('./')();
+const pkg = require('./package')
+const console = require('./')();
 
 (function(){
   // shortcut
