@@ -98,8 +98,8 @@ const console = require('./')();
     const yellow = red
       .box('Yellow Box Title', {over:true,color:'yellow',colorText:'yellow',border:2})
       .line('Yellow Box Line')
-    const green = yellow.box({color:'green'}).over().line('Hello World')
 
+    yellow.box({color:'green'}).over().line('Hello World')
     red.line('Red Box Bottom')
   }
 
@@ -113,16 +113,7 @@ const console = require('./')();
    * Example 2
    */
   const example2 = function(){
-    console.line({user:'RienNeVaPlus',id:123,attr:{
-      abc:1,
-        cde:2,
-        efg:false,
-        hij:4,
-        klm:true,
-        nop:6,
-        qrs:null,
-        tuv:8,
-      items:2432,top:[1,2],note:null},online:true})
+    console.line({user: 'RienNeVaPlus',id: 123,date: new Date(),attr:{items:2432,top:[1,2],note:null},online:true})
   }
 
   // example
