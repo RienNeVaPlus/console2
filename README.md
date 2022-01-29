@@ -30,8 +30,8 @@ $ npm install --save console2
 Have a [screenshot](https://raw.githubusercontent.com/safebyte/console2/master/media/help.png) of the output because you're lazy.
 
 ```javascript
-require('console2')();
-console.help();
+require('console2')()
+console.help()
 ```
 
 ## Usage
@@ -39,37 +39,37 @@ console.help();
 Console2 integrates seamlessly into the node `console`. However, you should make yourself familiar with the additional features, especially `box`, `line`, `over` & `out`.
 
 ```javascript
-require('console2')();
+require('console2')()
 
 // log a string
-console.log("They're minerals! Jesus Christ, Marie.");
+console.log("They're minerals! Jesus Christ, Marie.")
 // as you know and love it, native methods are fully supported
 
 // logs a string "the new way"
-console.line("You shall not pass (immediately)");
+console.line("You shall not pass (immediately)")
 // this queues your string until you call "console.out"
 // read more on this below
 
 // insert empty line & start a timer
-console.spacer().time('TimerTim');
+console.spacer().time('Timer1')
 
 // build a box - returns a new console instance
-var box = console.box('I am a child.');
+var box = console.box('I am a child.')
 
 // add a line to our new box
-box.line('I am the 2nd line of the sub box!');
+box.line('I am the 2nd line of the sub box!')
 
 // indicate that the box can be printed and there will be no more lines/boxes appended to it
-box.over();
+box.over()
 
 // insert empty line & print timer
-console.spacer().time('TimerTim');
+console.spacer().time('Timer1')
 
 // make noise
-console.beep();
+console.beep()
 
 // print everything, this exists because most actions are async
-console.out();
+console.out()
 ```
 
 #### Result
@@ -82,17 +82,17 @@ The main feature is the generation of *easy-to-read ASCII box-drawing character 
 
 ```
 // returns a new console instance which acts as a child box
-var box = console.box();
+var box = console.box()
 ```
 
 These boxes are 2 dimensional (meaning they depend on the previous / following lines), you can no longer *just stdout a line* when building a box. Doing so would result in a big mess of lines without any context to each other, because of the [nature of time](https://en.wikipedia.org/wiki/Asynchronous_operation). Imagine you want to log the process of updating a database inside a single box, whilst complimenting yourself:
 
 ```js
-box.log('Trying database update');
+box.log('Trying database update')
 setTimeout(function mimicDatabaseUpdate(){
-   box.log('Database updated');
-}, 1);
-console.log('You look gorgeous!');
+   box.log('Database updated')
+}, 1)
+console.log('You look gorgeous!')
 
 // expected output:
 // ├ You look gorgeous
@@ -111,11 +111,11 @@ As you see, you need to wait until you are done adding new lines before you can 
 Instead of `console.log`, use `console.line`. It does the same thing, except for calling `stdout` (it's not printing the line).
 
 ```js
-box.line('Trying database update');
+box.line('Trying database update')
 setTimeout(function mimicDatabaseUpdate(){
-   box.line('Database updated');
-}, 1);
-console.log('You look gorgeous!');
+   box.line('Database updated')
+}, 1)
+console.log('You look gorgeous!')
 ```
 
 *But now there's only the part where I compliment myself?* Right, here's what happened: You've added a line, then printed everything *that's ready* (`console.log` did that) and finally added another line to your box. But you didn't mark the box as **over** / *ready* and therefore console2 thinks you might want to add more lines.
@@ -124,7 +124,7 @@ console.log('You look gorgeous!');
 
 ```js
    // ...
-   box.line('Database updated').out();
+   box.line('Database updated').out()
    // ..
 ```
 
@@ -137,24 +137,24 @@ By calling `console.out()` (or in this case `box.out()`) **you tell** the parent
 You might run into situations where you want to mark a box as printable but don't want to print everything. For example when you're working on multiple child-boxes at once: you have to wait until every child box is done, before you can output the whole thing. That's what `box.over` is for:
 
 ```js
-var box = console.box('I am a box with children');
-var child1 = box.box('I am child #1');
-var child2 = box.box('I am child #2');
+var box = console.box('I am a box with children')
+var child1 = box.box('I am child #1')
+var child2 = box.box('I am child #2')
 
 async.each(arr, function iterate(data, callback){
-	child1.line('Processing item #1:', data);
+	child1.line('Processing item #1:', data)
 }, function onEnd(){
-	child1.over();
-});
+	child1.over()
+})
 
 // you don't know if i'm faster or slower than the onEnd above!
 setTimeout(function(){
-	child2.line('Hello friend').over();
-}, 123);
+	child2.line('Hello friend').over()
+}, 123)
 
 // i am some handy event in the future (or even an interval if you're a crazy person):
 function(){
-	console.out();
+	console.out()
 }
 ```
 
@@ -217,19 +217,19 @@ Useful stopwatch that shows the elapsed time in a readable format (ms + years, m
 
 ```javascript
 // Prints time since box was initialized
-console.time();
+console.time()
 
-// (1st call) starts a new timer, outputs 'TimerTony: start'
-console.time('TimerTony');
+// (1st call) starts a new timer, outputs 'Timer1: start'
+console.time('Timer1')
 
 // (1st call) same as above, no output
-console.time('TimerTony', true);
+console.time('Timer1', true)
 
-// (2nd call) outputs 'TimerTony: Xms'
-console.time('TimerTony');
+// (2nd call) outputs 'Timer1: Xms'
+console.time('Timer1')
 
-// (2nd call) outputs 'TimerTony: Xms - reset', resets the timer
-console.time('TimerTony', true);
+// (2nd call) outputs 'Timer1: Xms - reset', resets the timer
+console.time('Timer1', true)
 ```
 ***
 
@@ -255,7 +255,7 @@ Returns a promise with the output of `console.out()` as a string.
 | isWorker       | Boolean       | `false`   | Act as a [worker](https://nodejs.org/api/cluster.html#cluster_cluster_isworker) |
 | over           | Boolean       | `false`   | Allow output of box when a parent uses `out()`  |
 | disableAutoOut | Boolean       | `false`   | Console2 tries to detect whether to automatically call<br>`console.out` after new lines have been added.
-| override       | Boolean       | `true`    | Whether to override nodes `console`.<br><sub>Can only be set when first calling the main function.</sub> |
+| override       | Boolean       | `false`    | Whether to override nodes `console`.<br><sub>Can only be set when first calling the main function.</sub> |
 
 **Shortcuts**
 
@@ -276,7 +276,7 @@ Colorizes the `input`, can take multiple colors / commands  ([see module **chalk
 Use to colorize a string before adding it:
 
 ```javascript
-console.log(console.col('I am a beautiful rainbow!', 'rainbow'));
+console.log(console.col('I am a beautiful rainbow!', 'rainbow'))
 ```
 
 ***
@@ -316,8 +316,8 @@ console2 overrides the systems `console` object per default, so you don't have t
 You can disable this behaviour and use `console2` as a separate object by passing `false` into the main function.
 
 ```
-var console2 = require('console2')(false); // "false" is a shortcut for the option {override:false}
-console2.title('Hello World');
+var console2 = require('console2')(false) // "false" is a shortcut for the option {override:false}
+console2.title('Hello World')
 ```
 
 ## Thanks to
