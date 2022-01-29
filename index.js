@@ -1635,12 +1635,13 @@ Log.prototype._object = function(obj, data){
 						// is min 2nd lvl
 						(box.level - this.level	> 1
 							// is last of any > lvl1
-							? (i === valueLines.length-1 && keys[iKeys+1] && typeof objSub[keys[iKeys+1]] === 'object'
-							? '↓'
-							: (i === 0 && keys[iKeys-1] && typeof objSub[keys[iKeys-1]] === 'object'
-							? '↑'
-							: '│')
-						)
+							?
+								(i === valueLines.length-1 && keys[iKeys+1] && objSub[keys[iKeys+1]] !== null && typeof objSub[keys[iKeys+1]] === 'object'
+									? '↓'
+									: (i === 0 && keys[iKeys-1] && objSub[keys[iKeys-1]] !== null && typeof objSub[keys[iKeys-1]] === 'object'
+									? '↑'
+									: '│')
+								)
 							: ' '
 						), color, 'dim'
 					)
