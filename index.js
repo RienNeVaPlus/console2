@@ -33,7 +33,7 @@ class Log {
       opt.colorText = opt.color
 
     // default options
-    this.opt = Log.extend({
+    this.opt = Object.assign({
       console:    null,                                   // object to receive the output of console2
       border:     typeof opt === 'number' ? opt : 1,      // vertical border width (1 or 2)
       color:      typeof opt === 'string' ? opt : 'grey', // border color
@@ -132,20 +132,6 @@ class Log {
   }
 
   /**
-   * Copies all properties from the source to the destination object.
-   * Source: Prototype.js
-   *
-   * @param {Object} destination
-   * @param {Object} source
-   * @returns {*}
-   */
-  static extend(destination, source){
-    for(let property in source)
-      destination[property] = source[property]
-    return destination
-  }
-
-  /**
    * Clear terminal line + set cursor to 0
    */
   static clearLine(){
@@ -166,7 +152,7 @@ class Log {
   static truncate(str, length, postfix){
     // convert 2 string
     str = str+''
-    var plain = Log.strip(str)
+    const plain = Log.strip(str)
 
     // no action required
     if(plain.length <= length)
@@ -305,7 +291,7 @@ class Log {
     else if(typeof word == 'number')
       word = colors.cyan(word+'')
     else {
-      var s = word.toString()
+      let s = word.toString()
       switch(s){
         default: s = null
       }
@@ -359,7 +345,7 @@ class Log {
   }
 
   // clone console
-  static console = Log.extend({}, console)
+  static console = Object.assign({}, console)
 
   // color names
   static chalkColors = ['cyan','green','yellow','red','magenta','blue','white','grey','black']
@@ -389,7 +375,7 @@ class Log {
     this.opt.console = Log.console
 
     // override console
-    console = Log.extend(console, this)
+    console = Object.assign(console, this)
 
     // finish
     return this
@@ -419,7 +405,7 @@ class Log {
       opt.colorText = opt.color
 
     // set options
-    this.opt = Log.extend(this.opt, opt)
+    this.opt = Object.assign(this.opt, opt)
 
     return this
   }
@@ -731,7 +717,7 @@ class Log {
 
       // calc time
       Object.keys(struc).forEach(function(key){
-        var r = Math.floor(delta / struc[key])
+        const r = Math.floor(delta / struc[key])
         struc[key+'s'] = r
         delta -= r * struc[key]
 
@@ -768,7 +754,7 @@ class Log {
     obj.stack.split("\n").forEach(function(line, indexLine){
       // remove surrounding whitespaces
       line = line.trim()
-      var words = []
+      const words = []
 
       // 1st line
       if(indexLine === 0){
@@ -1094,7 +1080,7 @@ class Log {
 
             // iterate new lines
             addLines.forEach((line, posTop) => {
-              var isTopLast = posTop === addLines.length - 1
+              const isTopLast = posTop === addLines.length - 1
 
               line = ' '+Log.col(line, obj.color, 'bold')
 
@@ -1186,7 +1172,7 @@ class Log {
 
     // enable .line args
     if(method && Object.keys(Log.console).indexOf(method) < 0){
-      var args = Array.prototype.slice.call(arguments)
+      const args = Array.prototype.slice.call(arguments)
       this.line.apply(this, args)
     }
 
@@ -1290,7 +1276,7 @@ class Log {
    * @private
    */
   _try(funct, arg){
-    var args = Array.prototype.slice.call(arguments)
+    const args = Array.prototype.slice.call(arguments)
     args.shift()
 
     try {
@@ -1369,9 +1355,9 @@ class Log {
    */
   _object(obj, data){
     // handle data
-    data = Log.extend({
+    data = Object.assign({
       title: null,
-      colors: ['cyan','green','yellow','red','magenta'],
+      colors: ['cyan', 'green', 'yellow', 'red', 'magenta'],
       pathLabel: '#',
       padKey: 15,
       padVal: 45,
@@ -1387,7 +1373,7 @@ class Log {
         data.padKey = Math.max(data.padKey, objSub.length)
 
         // handle values (can go deeper)
-        return objSub.forEach((val, callbackArr) => compile(val, level+1, callbackArr))
+        return objSub.forEach((val, indexArray) => compile(val, level+1, indexArray))
       }
 
       // handle object
@@ -1397,12 +1383,12 @@ class Log {
         data.padVal = Math.max(data.padVal, Math.round(objSub.toString().length *.6)+2)
 
         // handle first level of keys
-        return Object.keys(objSub).forEach((key, callbackObj) => {
+        return Object.keys(objSub).forEach((key, indexObj) => {
           // count key length
           data.padKey = Math.max(data.padKey, (key+'').length)
 
           // handle value (can go deeper)
-          compile(objSub[key], level+1, callbackObj)
+          compile(objSub[key], level+1, indexObj)
         })
       }
 
@@ -1444,7 +1430,7 @@ class Log {
         objStr = '[object Object]'
 
       // set color
-      box.options({color:color})
+      box.options({color})
 
       // title "──────[object Object]─┤"
       if(!title){
@@ -1458,11 +1444,8 @@ class Log {
       if(objStr !== '[Function]')
         box.line(title, 'pre:')
 
-      if(objSub instanceof Date){
-        // todo
-      }
       // build function
-      else if(objSub instanceof Function){
+      if(objSub instanceof Function){
         const functStr = objSub.toString().replace(/\t/g, '  ').replace(/\r/g, '').split('\n')
         const spacer = (functStr.length+'').length
         const functPad = Math.max(data.pad, Log.getTerminalWidth())
@@ -1501,12 +1484,15 @@ class Log {
 
       // iterate object keys
       keys.forEach((key, iKeys) => {
-        const val = objSub[key]
+        let val = objSub[key]
 
+        if(val instanceof Date){
+          val = Log.col(val.toISOString(), 'blue')
+        }
         // sub object
-        if(val && typeof val === 'object'){
+        else if(val && typeof val === 'object'){
           // build path
-          path[box.level+1] = (parseInt(key) === key+'' ? '['+key+']' : '.'+key)
+          path[box.level+1] = (parseInt(key) == String(key) ? '['+key+']' : '.'+key)
 
           // title "key────[object Object]─┤"
           let title = Array.isArray(val) ? '[object Array]' : val.toString()
@@ -1537,7 +1523,10 @@ class Log {
 
         // function
         if(val instanceof Function){
-          valueLines = val.toString().replace(/\t/g, '  ').replace(/\r/g, '').split('\n')
+          valueLines = val.toString()
+            .replace(/\t/g, '  ')
+            .replace(/\r/g, '')
+            .split('\n')
         }
         // break value into multiple lines
         else if(typeof val === 'string'){
@@ -1553,7 +1542,7 @@ class Log {
           // build "title···: value │"
           box.line(
             // prefix
-            line.prefix[i<1?0:1]
+            line.prefix[ i < 1 ? 0 : 1 ]
             // value
             +	Log.col(Log.truncate(val, data.padVal-6), 'grey')
             // spacer
@@ -1640,12 +1629,12 @@ class Log {
 //	len -= postfix.length
 //
 //	if (!len || len < 10) return str; // probably not a valid console -- send back the whole line
-//	var count = 0,        // number of visible chars on line so far
+//	let count = 0,        // number of visible chars on line so far
 //	    esc = false,      // in an escape sequence
 //	    longesc = false  // in a multi-character escape sequence
-//	var outp = true      // should output this character
-//	var arr = str.split('')
-//	var res = arr.filter(function(c){ // filter characters...
+//	let outp = true      // should output this character
+//	let arr = str.split('')
+//	let res = arr.filter(function(c){ // filter characters...
 //		if (esc && !longesc && c == '[') longesc = true // have seen an escape, now '[', start multi-char escape
 //		if (c == '\x1b') esc = true // start of escape sequence
 //
