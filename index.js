@@ -35,14 +35,14 @@ class Log {
     // default options
     this.opt = Log.extend({
       console:    null,                                   // object to receive the output of console2
-      border:     typeof opt === 'number' ? opt : 1,       // vertical border width (1 or 2)
-      color:      typeof opt === 'string' ? opt : 'grey',  // border color
-      colorText:  typeof opt === 'string' ? opt : 'grey',  // text color
+      border:     typeof opt === 'number' ? opt : 1,      // vertical border width (1 or 2)
+      color:      typeof opt === 'string' ? opt : 'grey', // border color
+      colorText:  typeof opt === 'string' ? opt : 'grey', // text color
       isWorker:   false,                                  // run as a worker
-      map:        [['...','…']],                         // auto replace
+      map:        [['...','…']],                          // auto replace
       enableAutoOut: false,                               // enable auto out calls (used when in node console)
       disableWelcome: false,                              // disable our kind welcome line
-      override:   true,                                   // override nodes console
+      override:   false,                                  // override nodes console
       animate:    false,                                  // animate idle status
       over:       false                                   // box status
     }, opt||{})
@@ -382,7 +382,7 @@ class Log {
 
     if(Log.isTerminalConsole()){
       // disable 'undefined' console messages
-      process.stdin.emit('data', "module.exports.repl.ignoreUndefined = true;\n")
+      process.stdin.emit('data', 'module.exports.repl.ignoreUndefined = true;\n')
     }
 
     // copy original console
@@ -412,10 +412,6 @@ class Log {
     // handle options(2) - border width
     else if(opt === 1 || opt === 2){
       opt = {border:opt}
-    }
-    // handle options(false) - disable override
-    else if(opt === false){
-      opt = {override:false}
     }
 
     // use color as colorText when colorText not given
