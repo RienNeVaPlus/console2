@@ -27,11 +27,11 @@ $ npm install --save console2
 
 ### Quick Start
 
-Have a [screenshot](https://raw.githubusercontent.com/safebyte/console2/master/media/help.png) of the output because you're lazy.
+Have a [screenshot](https://raw.githubusercontent.com/safebyte/console2/master/media/help.png) of the output.
 
 ```javascript
-require('console2')()
-console.help()
+const console2 = require('console2')()
+console2.help()
 ```
 
 ## Usage
