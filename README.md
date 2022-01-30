@@ -39,22 +39,22 @@ console2.help()
 Console2 integrates seamlessly into the node `console`. However, you should make yourself familiar with the additional features, especially `box`, `line`, `over` & `out`.
 
 ```javascript
-require('console2')()
+const console2 = require('console2')()
 
 // log a string
-console.log("They're minerals! Jesus Christ, Marie.")
+console2.log("They're minerals! Jesus Christ, Marie.")
 // as you know and love it, native methods are fully supported
 
 // logs a string "the new way"
-console.line("You shall not pass (immediately)")
+console2.line("You shall not pass (immediately)")
 // this queues your string until you call "console.out"
 // read more on this below
 
 // insert empty line & start a timer
-console.spacer().time('Timer1')
+console2.spacer().time('Timer1')
 
 // build a box - returns a new console instance
-var box = console.box('I am a child.')
+const box = console2.box('I am a child.')
 
 // add a line to our new box
 box.line('I am the 2nd line of the sub box!')
@@ -63,13 +63,13 @@ box.line('I am the 2nd line of the sub box!')
 box.over()
 
 // insert empty line & print timer
-console.spacer().time('Timer1')
+console2.spacer().time('Timer1')
 
 // make noise
-console.beep()
+console2.beep()
 
 // print everything, this exists because most actions are async
-console.out()
+console2.out()
 ```
 
 #### Result
@@ -137,24 +137,20 @@ By calling `console.out()` (or in this case `box.out()`) **you tell** the parent
 You might run into situations where you want to mark a box as printable but don't want to print everything. For example when you're working on multiple child-boxes at once: you have to wait until every child box is done, before you can output the whole thing. That's what `box.over` is for:
 
 ```js
-var box = console.box('I am a box with children')
-var child1 = box.box('I am child #1')
-var child2 = box.box('I am child #2')
+const box = console2.box('I am a box with children')
+const child1 = box.box('I am child #1')
+const child2 = box.box('I am child #2')
 
-async.each(arr, function iterate(data, callback){
-	child1.line('Processing item #1:', data)
-}, function onEnd(){
-	child1.over()
-})
+async.each(arr, (data, callback) => {
+  child1.line('Processing item #1:', data)
+}, () => child1.over())
 
 // you don't know if i'm faster or slower than the onEnd above!
-setTimeout(function(){
-	child2.line('Hello friend').over()
-}, 123)
+setTimeout(() => child2.line('Hello friend').over(), 123)
 
-// i am some handy event in the future (or even an interval if you're a crazy person):
-function(){
-	console.out()
+// out .out() to print queued lines
+function print(){
+  console2.out('Additional output')
 }
 ```
 
@@ -166,84 +162,84 @@ Console2 not only improves the native console functions (`log`, `info`, `warn`, 
 
 ***
 
-#### ``console.help()``
+#### ``console2.help()``
 Displays a [short tutorial with examples](/media/help.png).
 
 ***
 
-#### ``console.box(content, option)``
+#### ``console2.box(content, option)``
 Create a sub box.
 
 ***
 
-#### ``console.line({...*}[, option])``
+#### ``console2.line({...*}[, option])``
 Add a line.
 
 ***
 
-#### ``console.over({...*}[, option])``
+#### ``console2.over({...*}[, option])``
 Adds a line and sets the option `{over:true}`
 
 ***
 
-#### ``console.out({...*}[, option])``
+#### ``console2.out({...*}[, option])``
 Flush current buffer (use this to actually **see** something).
 
 ***
 
-#### ``console.spacer()``
+#### ``console2.spacer()``
 Flush current buffer + adds an empty line.
 
 ***
 
-#### ``console.log({...*}[, option])``
+#### ``console2.log({...*}[, option])``
 Same as `console.line` but with an additional call to `console.out` to remain compatible to the native `console`.
 
 ***
 
-#### ``console.title({String} line)``
+#### ``console2.title({String} line)``
 Creates a title by adding two lines (above & below) the text.
 
 ***
 
-#### ``console.beep({String} [label])``
+#### ``console2.beep({String} [label])``
 Makes your terminal beep, outputs `beep: label`.
 
 ***
 
-#### ``console.time({String} [label], {Boolean} [reset])``
+#### ``console2.time({String} [label], {Boolean} [reset])``
 Useful stopwatch that shows the elapsed time in a readable format (ms + years, months, days...).
 **When called twice, the time in between the two calls is also measured & displayed!**
 
 ```javascript
 // Prints time since box was initialized
-console.time()
+console2.time()
 
 // (1st call) starts a new timer, outputs 'Timer1: start'
-console.time('Timer1')
+console2.time('Timer1')
 
 // (1st call) same as above, no output
-console.time('Timer1', true)
+console2.time('Timer1', true)
 
 // (2nd call) outputs 'Timer1: Xms'
-console.time('Timer1')
+console2.time('Timer1')
 
 // (2nd call) outputs 'Timer1: Xms - reset', resets the timer
-console.time('Timer1', true)
+console2.time('Timer1', true)
 ```
 ***
 
-#### ``console.trace({String} [label])``
+#### ``console2.trace({String} [label])``
 Beautified `console.trace`.
 
 ***
 
-#### ``console.build(stripLevels=0, useParent=false)``
+#### ``console2.build(stripLevels=0, useParent=false)``
 Returns a promise with the output of `console.out()` as a string.
 
 ***
 
-#### ``console.options({Object|String|Number} data)``
+#### ``console2.options({Object|String|Number} data)``
 
 | Option         | Type          | Default   | Help                                            |
 | -------------- |:------------- | ---------:|:----------------------------------------------- |
@@ -255,7 +251,7 @@ Returns a promise with the output of `console.out()` as a string.
 | isWorker       | Boolean       | `false`   | Act as a [worker](https://nodejs.org/api/cluster.html#cluster_cluster_isworker) |
 | over           | Boolean       | `false`   | Allow output of box when a parent uses `out()`  |
 | disableAutoOut | Boolean       | `false`   | Console2 tries to detect whether to automatically call<br>`console.out` after new lines have been added.
-| override       | Boolean       | `false`    | Whether to override nodes `console`.<br><sub>Can only be set when first calling the main function.</sub> |
+| override       | Boolean       | `false`    | Whether to override the native `console`.<br><sub>Can only be set when first calling the main function.</sub> |
 
 **Shortcuts**
 
@@ -264,7 +260,7 @@ Returns a promise with the output of `console.out()` as a string.
 
 ***
 
-#### ``console.col({String} input, {...String} color)``
+#### ``console2.col({String} input, {...String} color)``
 
 Colorizes the `input`, can take multiple colors / commands  ([see module **chalk**](https://github.com/chalk/chalk)).
 
@@ -276,24 +272,29 @@ Colorizes the `input`, can take multiple colors / commands  ([see module **chalk
 Use to colorize a string before adding it:
 
 ```javascript
-console.log(console.col('I am a beautiful rainbow!', 'rainbow'))
+console2.log(
+    console.col('I am a rainbow!', 'rainbow')
+)
 ```
 
 ***
 
-#### ``console.strip({String} input)``
+#### ``console2.strip({String} input)``
 
 Removes any ansi codes from the `input` string ([see module **chalk**](https://github.com/chalk/chalk)).
 
 ***
 
-#### ``console.pad({String} padSymbol, {Number} length, {Number} [str], {Boolean} [useLeftSide])``
+#### ``console2.pad({String} padSymbol, {Number} length, {Number} [str], {Boolean} [useLeftSide])``
 
+> Note: `pad` will be deprecated, use `String.padStart` or `String.padEnd` instead.
+> 
 Utility to generate a pad string when working with aligned texts.
 
+
 ```js
-console.pad('-', 5)           // = '-----'
-console.pad('.', 7, 'Hello')  // = 'Hello..'
+console.pad('-', 5)                 // = '-----'
+console.pad('.', 7, 'Hello')        // = 'Hello..'
 console.pad(' ', 7, 'Hello', true)  // = '  Hello'
 ```
 
@@ -310,10 +311,9 @@ Alias exist to cover features of the native `console` or to provide shortcuts fo
 | console **.timeEnd** | ⇔ | console **.time**          |
 | console **.ok** | ⇔ | console **.time('OK').out()**          |
 
-## Separate mode
+## Overriding the native console
 
-console2 overrides the systems `console` object per default, so you don't have to rewrite your code.
-You can disable this behaviour and use `console2` as a separate object by passing `false` into the main function.
+You can enable overriding of the native `console` by passing `true` into the main function or by using `console2.options({override: true})`.
 
 ```
 var console2 = require('console2')(false) // "false" is a shortcut for the option {override:false}
