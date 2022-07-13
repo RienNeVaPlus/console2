@@ -44,7 +44,7 @@ declare namespace Console2 {
 		beep: (label?: string) => this;
 		over: () => this;
 		out: (...lines: any[]) => this;
-		build: (stripLevels: boolean, useParent: boolean) => Promise<string>;
+		build: (stripLevels?: number, useParent?: boolean) => Promise<string>;
 		getParent: (generations: number) => this;
 	}
 
